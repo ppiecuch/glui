@@ -656,9 +656,10 @@ void    GLUI_Control::pack( int x, int y )
   y_margin_top = this->y_off_top;
   y_margin_bot = this->y_off_bot;
 
-  this->x_abs = x_in;
-  this->y_abs = y_in;
-
+  if ( alignment != GLUI_ALIGN_FLOAT ) {
+	  this->x_abs = x_in;
+	  this->y_abs = y_in;
+  }
   max_w  = 0;
   max_y  = 0;
   curr_x = this->x_abs + x_margin;

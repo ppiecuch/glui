@@ -146,6 +146,7 @@ enum GLUI_Glut_CB_Types
 #define GLUI_ALIGN_CENTER   1
 #define GLUI_ALIGN_RIGHT    2
 #define GLUI_ALIGN_LEFT     3
+#define GLUI_ALIGN_FLOAT    4
 
 /********** Limit types - how to limit spinner values *********/
 #define GLUI_LIMIT_NONE    0
@@ -248,6 +249,7 @@ class GLUI_Listbox;
 class GLUI_StaticText;
 class GLUI_EditText;
 class GLUI_Panel;
+class GLUI_MessageBox;
 class GLUI_Spinner;
 class GLUI_RadioButton;
 class GLUI_RadioGroup;
@@ -255,6 +257,7 @@ class GLUI_Glut_Window;
 class GLUI_TreePanel;
 class GLUI_Scrollbar;
 class GLUI_List;
+class GLUI_Popup;
 
 class Arcball;
 
@@ -929,7 +932,7 @@ public:
         spacebar_mouse_click = true;    /* Does spacebar simulate a mouse click? */
         live_type      = GLUI_LIVE_NONE;
         text = "";
-        last_live_text == "";
+        last_live_text = "";
         live_inited    = false;
         collapsible    = false;
         is_open        = true;
@@ -1167,6 +1170,12 @@ public:
     const char* get_file() { return file.c_str(); }
     void set_allow_change_dir(int c) { allow_change_dir = c; }
 
+	void set_show_all_files(int c) { show_all_files = c; }
+	void add_allowed_extension(const char *ext)
+	{
+		allowed_extensions.push_back(ext);
+	}
+
 protected:
     void common_init() 
     {
@@ -1182,6 +1191,7 @@ protected:
         name         = "";
         current_dir  = ".";
         file         = "";
+        show_all_files = 1;
     };
 
 private:
@@ -1189,6 +1199,8 @@ private:
     GLUI_String file;
     int allow_change_dir;
 
+	std::vector<GLUI_String> allowed_extensions;
+	int show_all_files;
 };
 
 /************************************************************/
@@ -2201,6 +2213,43 @@ protected:
 
 /************************************************************/
 /*                                                          */
+/*               Popup class - JVK                          */
+/*                                                          */
+/************************************************************/
+
+class GLUI_Popup : public GLUI_List
+{
+public:
+    /* GLUI Popup - JVK */
+    GLUI_Popup( GLUI_Node *parent, bool scroll = false,
+               int id=-1, GLUI_CB callback=GLUI_CB() );
+               /*, GLUI_Control *object = NULL 
+               ,GLUI_InterObject_CB obj_cb = NULL);*/
+
+    GLUI_Popup( GLUI_Node *parent,
+               GLUI_String& live_var, bool scroll = false, 
+               int id=-1, 
+               GLUI_CB callback=GLUI_CB()
+               /*,GLUI_Control *object = NULL */
+               /*,GLUI_InterObject_CB obj_cb = NULL*/);
+
+    int  mouse_down_handler( int local_x, int local_y );
+    int  mouse_up_handler( int local_x, int local_y, bool inside );
+    int  mouse_held_down_handler( int local_x, int local_y, bool inside );
+    int  key_handler( unsigned char key,int modifiers );
+    int  special_handler( int key,int modifiers );
+  
+    void activate( int how );
+    void deactivate( void );
+
+	void update_size( void );
+
+    int  mouse_over( int state, int x, int y );
+};
+
+
+/************************************************************/
+/*                                                          */
 /*               Scrollbar class - JVK                      */
 /*                                                          */
 /************************************************************/
@@ -2357,6 +2406,8 @@ public:
 
     int  do_selection( int item );
 
+	void deactivate( void );
+
     GLUI_Listbox_Item *get_item_ptr( const char *text );
     GLUI_Listbox_Item *get_item_ptr( int id );
   
@@ -2380,10 +2431,12 @@ protected:
         curr_text      = "";
         live_type      = GLUI_LIVE_INT;  /* This has an integer live var */
         depressed      = false;
-        glut_menu_id   = -1;
+        popup          = NULL;
     }
 
     ~GLUI_Listbox();
+    
+    GLUI_Popup *popup;
 };
 
 /************************************************************/

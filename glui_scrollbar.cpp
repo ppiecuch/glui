@@ -379,6 +379,7 @@ void GLUI_Scrollbar::draw_scroll() {
   update_scroll_parameters();
 
   // Draw track using a checkerboard background
+  static unsigned int scroll_bg_nm = 0;
   const unsigned char scroll_bg[] = {
     0xD4, 0xD0, 0xC8, 0xFF, 0xFF, 0xFF,
     0xFF, 0xFF, 0xFF, 0xD4, 0xD0, 0xC8
@@ -386,13 +387,17 @@ void GLUI_Scrollbar::draw_scroll() {
   glColor3f( 1.0, 1.0, 1.0 );
   glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
   glEnable( GL_TEXTURE_2D);
-  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE,
-  	  scroll_bg);
+  if (scroll_bg_nm == 0) {
+	glGenTextures(1, &scroll_bg_nm);
+	glBindTexture(GL_TEXTURE_2D, scroll_bg_nm);
+	glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+ 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+ 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+ 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+  	glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, 2, 2, 0, GL_RGB, GL_UNSIGNED_BYTE, scroll_bg);
+  } else
+	 glBindTexture(GL_TEXTURE_2D, scroll_bg_nm);
 
   float y0 = horizontal? 0 : GLUI_SCROLL_ARROW_HEIGHT;
   float y1 = horizontal? h : h-GLUI_SCROLL_ARROW_HEIGHT;

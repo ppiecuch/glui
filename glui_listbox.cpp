@@ -33,6 +33,27 @@
 
 #include "glui_internal_control.h"
 
+/****************************** Glistbox_callback() *************************/
+
+static void listbox_callback( int i )
+{
+  int old_val;
+
+  if ( NOT GLUI_Master.curr_left_button_glut_menu OR
+       !dynamic_cast<GLUI_Listbox*>(GLUI_Master.curr_left_button_glut_menu) )
+    return;
+
+  old_val = ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val;
+  ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->set_int_val(i);
+
+  /****   If value changed, execute callback   ****/
+  if ( old_val !=
+       ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val ) {
+    ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->execute_callback();
+  }
+}
+
+
 /****************************** GLUI_Listbox::GLUI_Listbox() **********/
 GLUI_Listbox::GLUI_Listbox( GLUI_Node *parent,
                             const char *name, int *value_ptr,
@@ -45,6 +66,10 @@ GLUI_Listbox::GLUI_Listbox( GLUI_Node *parent,
   set_name( name );
   callback    = cb;
 
+  popup = new GLUI_Popup(parent,true,1,listbox_callback);
+  // hide
+  //popup->hidden = true;  
+
   parent->add_control( this );
 
   init_live();
@@ -55,7 +80,27 @@ GLUI_Listbox::GLUI_Listbox( GLUI_Node *parent,
 
 int    GLUI_Listbox::mouse_down_handler( int local_x, int local_y )
 {
-  return false;
+  GLUI_Listbox_Item *item;
+
+  /*  printf( "x/y:   %d/%d\n", local_x, local_y );              */
+
+  if ( popup != NULL AND enabled AND local_x > x_abs + text_x_offset) {
+    /****  Build a GLUI popup menu for this listbox   ***/
+
+    /*	printf( "%d %d\n", x, y );              */
+
+	popup->delete_all();
+
+    item = (GLUI_Listbox_Item *) items_list.first_child();
+    while( item ) {
+      popup->add_item( item->id, item->text.c_str() );
+      item = (GLUI_Listbox_Item *) item->next();
+    }
+
+    // show
+  	popup->hidden = false;
+  }
+  return true;
 }
 
 
@@ -63,7 +108,6 @@ int    GLUI_Listbox::mouse_down_handler( int local_x, int local_y )
 
 int    GLUI_Listbox::mouse_up_handler( int local_x, int local_y, bool inside )
 {
-
   return false;
 }
 
@@ -83,6 +127,15 @@ int    GLUI_Listbox::mouse_held_down_handler( int local_x, int local_y,
 int    GLUI_Listbox::key_handler( unsigned char key,int modifiers )
 {
   return false;
+}
+
+
+/****************************** GLUI_Popup::deactivate() **********/
+
+void    GLUI_Listbox::deactivate( void )
+{
+  	if (popup)
+  		popup->hidden = false;
 }
 
 
@@ -132,10 +185,14 @@ void    GLUI_Listbox::draw( int x, int y )
 }
 
 
-/************************************ GLUI_Listbox::update_si() **********/
+/************************************ GLUI_Listbox::update_size() **********/
 void   GLUI_Listbox::update_size( void )
 {
   recalculate_item_width();
+  if (popup) {
+	  popup->w = w;
+	  popup->h=70;
+  }
 }
 
 /********************************* GLUI_Listbox::set_int_val() **************/
@@ -278,60 +335,11 @@ GLUI_Listbox_Item *GLUI_Listbox::get_item_ptr( int id )
 }
 
 
-/************************************ GLUI_Listbox::mouse_over() **********/
-
-static void listbox_callback( int i )
-{
-  int old_val;
-
-  if ( NOT GLUI_Master.curr_left_button_glut_menu OR
-       !dynamic_cast<GLUI_Listbox*>(GLUI_Master.curr_left_button_glut_menu) )
-    return;
-
-  old_val = ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val;
-  ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->set_int_val(i);
-
-  /****   If value changed, execute callback   ****/
-  if ( old_val !=
-       ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->int_val ) {
-    ((GLUI_Listbox*)GLUI_Master.curr_left_button_glut_menu)->execute_callback();
-  }
-}
-
-
 /*************************************** GLUI_Listbox::mouse_over() **********/
 
 int     GLUI_Listbox::mouse_over( int state, int x, int y )
 {
-  GLUI_Listbox_Item *item;
-
-  /*  printf( "x/y:   %d/%d\n", x, y );              */
-
-  if ( state AND enabled AND x > x_abs + text_x_offset) {
-    /****  Build a GLUT menu for this listbox   ***/
-
-    /*	printf( "%d %d\n", x, y );              */
-
-    glut_menu_id = glutCreateMenu(listbox_callback);
-
-    item = (GLUI_Listbox_Item *) items_list.first_child();
-    while( item ) {
-      glutAddMenuEntry( item->text.c_str(), item->id );
-      item = (GLUI_Listbox_Item *) item->next();
-    }
-
-    glutAttachMenu( GLUT_LEFT_BUTTON);
-
-    GLUI_Master.set_left_button_glut_menu_control( this );
-  }
-  else if ( glut_menu_id != -1 ) {
-    /*    printf( "OUT\n" );              */
-    glutDetachMenu( GLUT_LEFT_BUTTON );
-    glutDestroyMenu( glut_menu_id );
-    glut_menu_id = -1;
-  }
-
-  return true;
+  return false;
 }
 
 
@@ -373,6 +381,12 @@ int    GLUI_Listbox::do_selection( int item_num )
 
 GLUI_Listbox::~GLUI_Listbox()
 {
+  if ( popup != NULL ) {
+    /*    printf( "OUT\n" );              */
+    delete popup;
+    popup = NULL;
+  }
+
   GLUI_Listbox_Item *item = (GLUI_Listbox_Item *) items_list.first_child();
 
   while (item)

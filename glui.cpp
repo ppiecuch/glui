@@ -256,9 +256,9 @@ void glui_reshape_func(int w,int h )
     while(glui) {
       if ( TEST_AND( glui->flags, GLUI_SUBWINDOW) AND
 	   glui->parent_window == current_window ) {
-	glutSetWindow( glui->get_glut_window_id());
-	glui->reshape(w,h);
-	/*	glui->check_subwindow_position();          */
+		glutSetWindow( glui->get_glut_window_id());
+		glui->reshape(w,h);
+		/*	glui->check_subwindow_position();          */
       }
       glui = (GLUI*) glui->next();
     }
