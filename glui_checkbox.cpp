@@ -11,8 +11,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -34,10 +34,12 @@
 
 #include "glui_internal_control.h"
 
+#include "tinyformat.h"
+
 /****************************** GLUI_Checkbox::GLUI_Checkbox() **********/
 
 GLUI_Checkbox::GLUI_Checkbox( GLUI_Node *parent,
-                              const char *name, int *value_ptr,
+                              const GLUI_String &name, int *value_ptr,
                               int id,
                               GLUI_CB cb )
 {
@@ -51,6 +53,17 @@ GLUI_Checkbox::GLUI_Checkbox( GLUI_Node *parent,
   parent->add_control( this );
 
   init_live();
+}
+
+void GLUI_Checkbox::common_init()
+{
+  name           = tfm::format("Checkbox: %p", this);
+  w              = 100;
+  h              = GLUI_CHECKBOX_SIZE;
+  orig_value     = -1;
+  text_x_offset  = 18;
+  can_activate   = true;
+  live_type      = GLUI_LIVE_INT;   /* This control has an 'int' live var */
 }
 
 /****************************** GLUI_Checkbox::mouse_down_handler() **********/
@@ -136,7 +149,7 @@ void    GLUI_Checkbox::draw( int x, int y )
 
 /**************************** GLUI_Checkbox::draw_active_area() **************/
 
-void    GLUI_Checkbox::draw_active_area( void )
+void    GLUI_Checkbox::draw_active_area()
 {
   GLUI_DRAWINGSENTINAL_IDIOM
   int text_width, left, right;
@@ -164,7 +177,7 @@ void    GLUI_Checkbox::draw_active_area( void )
 
 /************************************ GLUI_Checkbox::update_size() **********/
 
-void   GLUI_Checkbox::update_size( void )
+void   GLUI_Checkbox::update_size()
 {
   int text_size;
 

@@ -17,12 +17,12 @@
 */
 
 #include "GL/glui.h"
-
+#include "tinyformat.h"
 
 
 /****************************** GLUI_TreePanel::GLUI_TreePanel() *********/
 
-GLUI_TreePanel::GLUI_TreePanel(GLUI_Node *parent, const char *name,
+GLUI_TreePanel::GLUI_TreePanel(GLUI_Node *parent, const GLUI_String &name,
                                bool open, int inset)
 {
   common_init();
@@ -61,7 +61,7 @@ void GLUI_TreePanel::set_level_color(float r, float g, float b)
 /****************************** GLUI_TreePanel::ab() *********/
 
 /* Adds branch to curr_root */
-GLUI_Tree *GLUI_TreePanel::ab(const char *name, GLUI_Tree *root)
+GLUI_Tree *GLUI_TreePanel::ab(const GLUI_String &name, GLUI_Tree *root)
 {
   GLUI_Tree *temp;
 
@@ -182,22 +182,22 @@ void GLUI_TreePanel::formatNode(GLUI_Tree *temp)
     return;
   int level = temp->get_level();
   int child_number = temp->get_child_number();
-  GLUI_String level_name="";
-  GLUI_String full_name="";
+  GLUI_String level_name;
+  GLUI_String full_name;
 
-  temp->level_name == "";
+  temp->level_name.clear();
 
   if (format & GLUI_TREEPANEL_DISPLAY_HIERARCHY) {
     if (format & GLUI_TREEPANEL_HIERARCHY_LEVEL_ONLY) {
-      glui_format_str(level_name, "%d", level);
+      level_name = tfm::format("%d", level);
     }
     if (format & GLUI_TREEPANEL_HIERARCHY_NUMERICDOT) {
       if ( dynamic_cast<GLUI_Tree*>(temp->parent()) )
-        glui_format_str(level_name, "%s.%d",
-                        ((GLUI_Tree *)(temp->parent()))->level_name.c_str(),
+        level_name = tfm::format("%s.%d",
+                        ((GLUI_Tree *)(temp->parent()))->level_name,
                         child_number);
       else
-        glui_format_str(level_name, "%d", child_number);
+        level_name = tfm::format("%d", child_number);
     }
   }
 

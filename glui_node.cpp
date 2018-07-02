@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -49,7 +49,7 @@ GLUI_Node::GLUI_Node()
 /********************************************* GLUI_Node::first() *******/
 /* Returns first sibling in 'this' node's sibling list                  */
 
-GLUI_Node   *GLUI_Node::first_sibling( void )
+GLUI_Node   *GLUI_Node::first_sibling()
 {
   if ( parent_node == NULL )
     return this;           /* root node has no siblings */
@@ -61,7 +61,7 @@ GLUI_Node   *GLUI_Node::first_sibling( void )
 /******************************************** GLUI_Node::next() ********/
 /* Returns next sibling in 'this' node's sibling list                  */
 
-GLUI_Node    *GLUI_Node::next( void )
+GLUI_Node    *GLUI_Node::next()
 {
   return next_sibling;
 }
@@ -70,7 +70,7 @@ GLUI_Node    *GLUI_Node::next( void )
 /******************************************** GLUI_Node::prev() ********/
 /* Returns prev sibling in 'this' node's sibling list                  */
 
-GLUI_Node    *GLUI_Node::prev( void )
+GLUI_Node    *GLUI_Node::prev()
 {
   return prev_sibling;
 }
@@ -79,7 +79,7 @@ GLUI_Node    *GLUI_Node::prev( void )
 /********************************************* GLUI_Node::last() *******/
 /* Returns last sibling in 'this' node's sibling list                  */
 
-GLUI_Node   *GLUI_Node::last_sibling( void )
+GLUI_Node   *GLUI_Node::last_sibling()
 {
   if ( parent_node == NULL )
     return this;            /* root node has no siblings */
@@ -174,7 +174,7 @@ void   GLUI_Node::link_this_to_sibling_prev( GLUI_Node *sibling )
 
 /**************************************** GLUI_Node::unlink() **************/
 
-void   GLUI_Node::unlink( void )
+void   GLUI_Node::unlink()
 {
   /* Unlink from prev sibling */
   if ( this->prev_sibling != NULL ) {
@@ -201,9 +201,9 @@ void   GLUI_Node::unlink( void )
 
 /**************************************** GLUI_Node::dump() **************/
 
-void GLUI_Node::dump( FILE *out, const char *name )
+void GLUI_Node::dump( FILE *out, const GLUI_String &name )
 {
-    fprintf( out, "GLUI_node: %s\n", name );
+    fprintf( out, "GLUI_node: %s\n", name.c_str() );
     fprintf( out, "   parent: %p     child_head: %p    child_tail: %p\n",
         (void *) parent_node,
         (void *) child_head,

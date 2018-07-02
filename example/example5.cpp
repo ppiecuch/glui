@@ -14,6 +14,12 @@
 #include <string.h>
 #include <GL/glui.h>
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 float xy_aspect;
 int   last_x, last_y;
 float rotationX = 0.0, rotationY = 0.0;
@@ -37,7 +43,7 @@ float sphere_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float torus_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float view_rotate[16] = { 1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1 };
 float obj_pos[] = { 0.0, 0.0, 0.0 };
-char *string_list[] = { "Hello World!", "Foo", "Testing...", "Bounding box: on" };
+const char *string_list[] = { "Hello World!", "Foo", "Testing...", "Bounding box: on" };
 int   curr_string = 0;
 
 /** Pointers to the windows and some of the controls we'll create **/
@@ -160,7 +166,7 @@ void myGlutMenu( int value )
 
 /***************************************** myGlutIdle() ***********/
 
-void myGlutIdle( void )
+void myGlutIdle()
 {
   /* According to the GLUT specification, the current window is 
      undefined during an idle callback.  So we need to explicitly change
@@ -234,7 +240,7 @@ void draw_axes( float scale )
 
 /***************************************** myGlutDisplay() *****************/
 
-void myGlutDisplay( void )
+void myGlutDisplay()
 {
   glClearColor( .9f, .9f, .9f, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

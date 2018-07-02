@@ -5,8 +5,8 @@
   GLUI User Interface Toolkit
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -78,6 +78,8 @@
 
 #ifndef GLUI_ALGEBRA3_H
 #define GLUI_ALGEBRA3_H
+
+#include <string>
 
 #include <cmath>
 #include <cstdio>
@@ -212,7 +214,7 @@ public:
   vec3&  apply(V_FCT_PTR fct);                // apply a func. to each component
   void   set(float x, float y, float z);      // set vector
 
-  void   print(FILE *file, const char *name) const; // print vector to a file
+  void   print(FILE *file, const std::string &name) const; // print vector to a file
 
 
   float &operator [] (int i);       // indexing
@@ -287,7 +289,7 @@ public:
   vec4  &apply(V_FCT_PTR fct);                // apply a func. to each component
   vec4  &homogenize();
 
-  void   print(FILE *file, const char *name) const; // print vector to a file
+  void   print(FILE *file, const std::string &name) const; // print vector to a file
 
   void   set(float x, float y, float z, float a);
 
@@ -354,7 +356,7 @@ public:
   mat3  inverse() const;                      // inverse
   mat3 &apply(V_FCT_PTR fct);                 // apply a func. to each element
 
-  void  print(FILE *file, const char *name ) const; // print matrix to a file
+  void  print(FILE *file, const std::string &name ) const; // print matrix to a file
 
   void  set(const vec3 &v0, const vec3 &v1, const vec3 &v2);
 
@@ -421,7 +423,7 @@ public:
   mat4  inverse() const;                     // inverse
   mat4 &apply(V_FCT_PTR fct);                // apply a func. to each element
 
-  void  print(FILE *file, const char *name) const; // print matrix to a file
+  void  print(FILE *file, const std::string &name) const; // print matrix to a file
 
   vec4 &operator [] (int i);       // indexing
   const vec4 &operator [] (int i) const; // indexing

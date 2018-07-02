@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -32,11 +32,15 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
+
+#include "tinyformat.h"
+
+#include <algorithm>
 #include <cassert>
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
                              int data_type, void *live_var,
                              int id, GLUI_CB callback )
 {
@@ -60,7 +64,7 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
                               int text_type, int id, GLUI_CB callback )
 {
   common_construct( parent, name, text_type, GLUI_LIVE_NONE, 0, id, callback);
@@ -68,7 +72,7 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
                               int *live_var,
                               int id, GLUI_CB callback )
 {
@@ -77,7 +81,7 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
                               float *live_var,
                               int id, GLUI_CB callback )
 {
@@ -86,8 +90,8 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
-                              char *live_var,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
+                              GLUI_String *live_var,
                               int id, GLUI_CB callback )
 {
   common_construct( parent, name, GLUI_EDITTEXT_TEXT, GLUI_LIVE_TEXT, live_var, id, callback);
@@ -95,7 +99,7 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::GLUI_EditText() **********/
 
-GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
+GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const GLUI_String &name,
                               std::string &live_var,
                               int id, GLUI_CB callback )
 {
@@ -104,7 +108,7 @@ GLUI_EditText::GLUI_EditText( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_EditText::common_construct() **********/
 
-void GLUI_EditText::common_construct( GLUI_Node *parent, const char *name,
+void GLUI_EditText::common_construct( GLUI_Node *parent, const GLUI_String &name,
                                       int data_t, int live_t, void *data, int id,
                                       GLUI_CB cb )
 {
@@ -245,8 +249,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
       }
     }
     else {                         /* There is a selection */
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
   }
@@ -258,8 +262,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
       sel_end = find_word_break( insertion_pt, +1 );
     }
 
-    clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-    insertion_pt = MIN(sel_start,sel_end);
+    clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+    insertion_pt = std::min(sel_start,sel_end);
     sel_start = sel_end = insertion_pt;
   }
   else if ( key == CTRL('h') ) {       /* BACKSPACE */
@@ -275,8 +279,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
       }
     }
     else {                         /* There is a selection */
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
   }
@@ -337,8 +341,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
       if ( key == '-' ) { /* User typed a '-' */
 
         /* If user has first character selected, then '-' is allowed */
-        if ( NOT ( MIN(sel_start,sel_end) == 0 AND
-                   MAX(sel_start,sel_end) > 0 ) ) {
+        if ( NOT ( std::min(sel_start,sel_end) == 0 AND
+                   std::max(sel_start,sel_end) > 0 ) ) {
 
           /* User does not have 1st char selected */
           if (insertion_pt != 0 OR text[0] == '-' ) {
@@ -358,7 +362,7 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
 
           int period_found = false;
           if ( sel_start != sel_end ) {
-            for( i=MIN(sel_end,sel_start); i<MAX(sel_start,sel_end); i++ ) {
+            for( i=std::min(sel_end,sel_start); i<std::max(sel_start,sel_end); i++ ) {
               /*  printf( "%c ", text[i] );              */
               if ( text[i] == '.' ) {
                 period_found = true;
@@ -382,8 +386,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
       if ( key == '-' ) { /* User typed a '-' */
 
         /* If user has first character selected, then '-' is allowed */
-        if ( NOT ( MIN(sel_start,sel_end) == 0 AND
-          MAX(sel_start,sel_end) > 0 ) ) {
+        if ( NOT ( std::min(sel_start,sel_end) == 0 AND
+          std::max(sel_start,sel_end) > 0 ) ) {
 
             /* User does not have 1st char selected */
             if (insertion_pt != 0 OR text[0] == '-' ) {
@@ -402,8 +406,8 @@ int    GLUI_EditText::key_handler( unsigned char key,int modifiers )
 
     /**** If there's a current selection, erase it ******/
     if ( sel_start != sel_end ) {
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
 
@@ -468,7 +472,7 @@ void    GLUI_EditText::activate( int how )
 
 /****************************** GLUI_EditText::deactivate() **********/
 
-void    GLUI_EditText::deactivate( void )
+void    GLUI_EditText::deactivate()
 {
   int    new_int_val;
   float  new_float_val;
@@ -539,7 +543,7 @@ void    GLUI_EditText::draw( int x, int y )
   GLUI_DRAWINGSENTINAL_IDIOM
   int name_x;
 
-  name_x = MAX(text_x_offset - string_width(this->name) - 3,0);
+  name_x = std::max(text_x_offset - string_width(this->name) - 3,0);
   draw_name( name_x , 13);
 
   glBegin( GL_LINES );
@@ -574,7 +578,7 @@ void    GLUI_EditText::draw( int x, int y )
 
 /************************** GLUI_EditText::update_substring_bounds() *********/
 
-int    GLUI_EditText::update_substring_bounds( void )
+int    GLUI_EditText::update_substring_bounds()
 {
   int box_width;
   int text_len = (int)text.length();
@@ -584,12 +588,12 @@ int    GLUI_EditText::update_substring_bounds( void )
   old_end = substring_end;
 
   /*** Calculate the width of the usable area of the edit box ***/
-  box_width = MAX( this->w - this->text_x_offset
+  box_width = std::max( this->w - this->text_x_offset
 		   - 4     /*  2 * the two-line box border */
 		   - 2 * GLUI_EDITTEXT_BOXINNERMARGINX, 0 );
 
-  CLAMP( substring_end, 0, MAX(text_len-1,0) );
-  CLAMP( substring_start, 0, MAX(text_len-1,0) );
+  CLAMP( substring_end, 0, std::max(text_len-1,0) );
+  CLAMP( substring_start, 0, std::max(text_len-1,0) );
 
   if ( debug )    dump( stdout, "-> UPDATE SS" );
 
@@ -640,7 +644,7 @@ int    GLUI_EditText::update_substring_bounds( void )
 
 /********************************* GLUI_EditText::update_x_offsets() *********/
 
-void    GLUI_EditText::update_x_offsets( void )
+void    GLUI_EditText::update_x_offsets()
 {
 }
 
@@ -675,8 +679,8 @@ void    GLUI_EditText::draw_text( int x, int y )
     substring_start, substring_end );
     */
   /** Find lower and upper selection bounds **/
-  sel_lo = MIN(sel_start, sel_end );
-  sel_hi = MAX(sel_start, sel_end );
+  sel_lo = std::min(sel_start, sel_end );
+  sel_hi = std::max(sel_start, sel_end );
 
   int sel_x_start, sel_x_end, delta;
 
@@ -788,7 +792,7 @@ int  GLUI_EditText::find_insertion_pt( int x, int y )
 
 /******************************** GLUI_EditText::draw_insertion_pt() *********/
 
-void     GLUI_EditText::draw_insertion_pt( void )
+void     GLUI_EditText::draw_insertion_pt()
 {
   int curr_x, i;
 
@@ -854,7 +858,7 @@ int  GLUI_EditText::substring_width( int start, int end )
 
 /***************************** GLUI_EditText::update_and_draw_text() ********/
 
-void   GLUI_EditText::update_and_draw_text( void )
+void   GLUI_EditText::update_and_draw_text()
 {
   if ( NOT can_draw() )
     return;
@@ -933,7 +937,7 @@ int    GLUI_EditText::special_handler( int key,int modifiers )
 int    GLUI_EditText::find_word_break( int start, int direction )
 {
   int    i, j;
-  char   *breaks = " :-.,";
+  const char   *breaks = " :-.,";
   int     num_break_chars = (int)strlen(breaks), text_len = (int)text.length();
   int     new_pt;
 
@@ -994,7 +998,7 @@ void   GLUI_EditText::clear_substring( int start, int end )
 
 /************************************ GLUI_EditText::update_size() **********/
 
-void   GLUI_EditText::update_size( void )
+void   GLUI_EditText::update_size()
 {
   int text_size, delta;
 
@@ -1024,7 +1028,7 @@ void   GLUI_EditText::update_size( void )
 
 /****************************** GLUI_EditText::set_text() **********/
 
-void    GLUI_EditText::set_text( const char *new_text )
+void    GLUI_EditText::set_text( const GLUI_String &new_text )
 {
   text=new_text;
   substring_start = 0;
@@ -1133,53 +1137,51 @@ void   GLUI_EditText::set_int_limits( int low, int high, int limit_type )
 
 /************************************ GLUI_EditText::set_numeric_text() ******/
 
-void    GLUI_EditText::set_numeric_text( void )
+void    GLUI_EditText::set_numeric_text()
 {
-  char buf_num[200];
-  int  i, text_len;
+  GLUI_String buf_num;
 
   if ( data_type == GLUI_EDITTEXT_FLOAT ) {
-    sprintf( buf_num, "%#g", float_val );
-
+    buf_num = tfm::format("%#g", float_val);
     num_periods = 0;
-    text_len = (int) strlen(buf_num);
-    for ( i=0; i<text_len; i++ )
-      if ( buf_num[i] == '.' )
-        num_periods++;
+    for ( size_t i=0; i<buf_num.size(); ++i ) {
+      if ( buf_num[i] == '.' ) num_periods++;
+    }
 
     /* Now remove trailing zeros */
     if ( num_periods > 0 ) {
-      text_len = (int) strlen(buf_num);
-      for ( i=text_len-1; i>0; i-- ) {
-        if ( buf_num[i] == '0' AND buf_num[i-1] != '.' )
-          buf_num[i] = '\0';
-        else
+      size_t i = 0;
+      for ( size_t i=buf_num.size()-1; i>0 && i<buf_num.size(); i-- )
+      {
+        if ( buf_num[i]!='0' || buf_num[i-1]=='.' )
+        {
+          buf_num = buf_num.substr(0,i+1);
           break;
+        }
       }
     }
-    set_text( buf_num );
   }
   else {
-    sprintf( buf_num, "%d", int_val );
-    set_text( buf_num );
+    buf_num = tfm::format("%d", int_val);
   }
-
+  set_text( buf_num );
 }
 
 
 /*************************************** GLUI_EditText::dump() **************/
 
-void   GLUI_EditText::dump( FILE *out, const char *name )
+void   GLUI_EditText::dump( FILE *out, const GLUI_String &name )
 {
-  fprintf( out,
-           "%s (edittext@%p):  ins_pt:%d  subs:%d/%d  sel:%d/%d   len:%d\n",
-           name, this,
-           insertion_pt,
-           substring_start,
-           substring_end,
-           sel_start,
-           sel_end,
-           (int) text.length());
+  const GLUI_String buffer = tfm::format(
+    "%s (edittext@%p):  ins_pt:%d  subs:%d/%d  sel:%d/%d   len:%d\n",
+    name, this,
+    insertion_pt,
+    substring_start,
+    substring_end,
+    sel_start,
+    sel_end,
+    text.length());
+  fprintf(out, "%s", buffer.c_str());
 }
 
 

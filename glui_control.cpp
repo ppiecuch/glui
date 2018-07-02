@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -33,19 +33,77 @@
 
 #include "glui_internal_control.h"
 
+#include "tinyformat.h"
+
+#include <algorithm>
+
 int _glui_draw_border_only = 0;
+
+/********* GLUI_Control::GLUI_Control() **********/
+
+GLUI_Control::GLUI_Control() 
+{
+    x_off          = GLUI_XOFF;
+    y_off_top      = GLUI_YOFF;
+    y_off_bot      = GLUI_YOFF;
+    x_abs          = GLUI_XOFF;
+    y_abs          = GLUI_YOFF;
+    active         = false;
+    enabled        = true;
+    int_val        = 0;
+    last_live_int  = 0;
+    float_array_size = 0;
+    name           = tfm::format("Control: %p", this);
+    float_val      = 0.0;
+    last_live_float = 0.0;
+    ptr_val        = NULL;
+    glui           = NULL;
+    w              = GLUI_DEFAULT_CONTROL_WIDTH;
+    h              = GLUI_DEFAULT_CONTROL_HEIGHT;
+    font           = NULL;
+    active_type    = GLUI_CONTROL_ACTIVE_MOUSEDOWN;
+    alignment      = GLUI_ALIGN_LEFT;
+    is_container   = false;
+    can_activate   = true;         /* By default, you can activate a control */
+    spacebar_mouse_click = true;    /* Does spacebar simulate a mouse click? */
+    live_type      = GLUI_LIVE_NONE;
+    text = "";
+    last_live_text = "";
+    live_inited    = false;
+    collapsible    = false;
+    is_open        = true;
+    hidden         = false;
+    memset(char_widths, -1, sizeof(char_widths)); /* JVK */
+    int i;
+    for( i=0; i<GLUI_DEF_MAX_ARRAY; i++ )
+        float_array_val[i] = last_live_float_array[i] = 0.0;
+}
+
+/********* GLUI_Control::~GLUI_Control() **********/
+
+GLUI_Control::~GLUI_Control()
+{
+  GLUI_Control *item = (GLUI_Control*) this->first_child();
+
+  while (item)
+  {
+    GLUI_Control *tmp = item;
+    item = (GLUI_Control*) item->next();
+    delete tmp;
+  }
+}
 
 /*************************** Drawing Utility routines *********************/
 
 /* Redraw this control. */
-void	      GLUI_Control::redraw(void) {
+void	      GLUI_Control::redraw() {
     if (glui==NULL || hidden) return;
     if (glui->should_redraw_now(this))
       translate_and_draw_front();
 }
 
 /** Redraw everybody in our window. */
-void	     GLUI_Control::redraw_window(void) {
+void	     GLUI_Control::redraw_window() {
   if (glui==NULL || hidden) return;
   if ( glui->get_glut_window_id() == -1 ) return;
   int orig = set_to_glut_window();
@@ -71,7 +129,7 @@ void GLUI_Control::translate_and_draw_front()
 
 /********** GLUI_Control::set_to_bkgd_color() ********/
 
-void GLUI_Control::set_to_bkgd_color( void )
+void GLUI_Control::set_to_bkgd_color()
 {
   if ( NOT glui )
     return;
@@ -285,7 +343,7 @@ void GLUI_Control::set_font(void *new_font)
 
 /********** GLUI_Control::draw_string() ************/
 
-void GLUI_Control::draw_string( const char *text )
+void GLUI_Control::draw_string( const GLUI_String &text )
 {
   _glutBitmapString( get_font(), text );
 }
@@ -301,7 +359,7 @@ void GLUI_Control::draw_char(char c)
 
 /*********** GLUI_Control::string_width() **********/
 
-int GLUI_Control::string_width(const char *text)
+int GLUI_Control::string_width(const GLUI_String &text)
 {
   return _glutBitmapWidthString( get_font(), text );
 }
@@ -324,7 +382,7 @@ int GLUI_Control::char_width(char c)
 
 /*************** GLUI_Control::get_font() **********/
 
-void *GLUI_Control::get_font( void )
+void *GLUI_Control::get_font()
 {
   /*** Does this control have its own font? ***/
   if ( this->font != NULL )
@@ -511,7 +569,7 @@ void GLUI_Control::pack_old(int x, int y)
       if ( dynamic_cast<GLUI_Rollout*>(this) ) {
 	/**  We don't want the rollout to shrink in width when it's
 	  closed **/
-	this->w = MAX(this->w, column_x + max_w + 2 * x_margin );
+	this->w = std::max(this->w, column_x + max_w + 2 * x_margin );
       }
       else {
 	this->w        = column_x + max_w + 2 * x_margin;
@@ -1031,7 +1089,7 @@ void  GLUI_Control::get_float_array_val( float *array_ptr )
 
 /**** GLUI_Control::set_name() ********************/
 
-void   GLUI_Control::set_name( const char *str )
+void   GLUI_Control::set_name( const GLUI_String &str )
 {
   name = str;
   redraw();
@@ -1129,20 +1187,6 @@ bool GLUI_Control::needs_idle() const
   return false;
 }
 
-
-/********* GLUI_Control::~GLUI_Control() **********/
-
-GLUI_Control::~GLUI_Control()
-{
-  GLUI_Control *item = (GLUI_Control*) this->first_child();
-
-  while (item)
-  {
-    GLUI_Control *tmp = item;
-    item = (GLUI_Control*) item->next();
-    delete tmp;
-  }
-}
 
 /********* GLUI_Control::hide_internal() ********/
 /** Sets hidden==true for this  control and all its siblings.             */

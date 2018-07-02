@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -33,7 +33,7 @@
 
 #include "glui_internal_control.h"
 
-GLUI_Panel::GLUI_Panel( GLUI_Node *parent, const char *name, int type )
+GLUI_Panel::GLUI_Panel( GLUI_Node *parent, const GLUI_String &name, int type )
 {
   common_init();
   set_name( name );
@@ -142,10 +142,9 @@ void    GLUI_Panel::draw( int x, int y )
 
 /****************************** GLUI_Panel::set_name() **********/
 
-void    GLUI_Panel::set_name( const char *new_name )
+void    GLUI_Panel::set_name( const GLUI_String &new_name )
 {
-  name = new_name ? new_name : "";
-
+  name = new_name;
   update_size();
 
   if ( glui )
@@ -167,7 +166,7 @@ void    GLUI_Panel::set_type( int new_type )
 
 /************************************** GLUI_Panel::update_size() **********/
 
-void   GLUI_Panel::update_size( void )
+void   GLUI_Panel::update_size()
 {
   int text_size;
 

@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher, 2004 John Kew
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -32,8 +32,9 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
-#include <cmath>
 
+#include <algorithm>
+#include <cmath>
 
 static const int LINE_HEIGHT = 15;
 
@@ -192,8 +193,8 @@ int    GLUI_TextBox::key_handler( unsigned char key,int modifiers )
       }
     }
     else {                         /* There is a selection */
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
   }
@@ -205,8 +206,8 @@ int    GLUI_TextBox::key_handler( unsigned char key,int modifiers )
       sel_end = find_word_break( insertion_pt, +1 );
     }
 
-    clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-    insertion_pt = MIN(sel_start,sel_end);
+    clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+    insertion_pt = std::min(sel_start,sel_end);
     sel_start = sel_end = insertion_pt;
   }
   else if ( key == CTRL('h') ) {       /* BACKSPACE */
@@ -217,8 +218,8 @@ int    GLUI_TextBox::key_handler( unsigned char key,int modifiers )
       }
     }
     else {                         /* There is a selection */
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
   }
@@ -282,8 +283,8 @@ int    GLUI_TextBox::key_handler( unsigned char key,int modifiers )
 
     /**** If there's a current selection, erase it ******/
     if ( sel_start != sel_end ) {
-      clear_substring( MIN(sel_start,sel_end), MAX(sel_start,sel_end ));
-      insertion_pt = MIN(sel_start,sel_end);
+      clear_substring( std::min(sel_start,sel_end), std::max(sel_start,sel_end ));
+      insertion_pt = std::min(sel_start,sel_end);
       sel_start = sel_end = insertion_pt;
     }
 
@@ -318,7 +319,7 @@ int    GLUI_TextBox::key_handler( unsigned char key,int modifiers )
 
 /****************************** GLUI_TextBox::enable() **********/
 
-void GLUI_TextBox::enable( void )
+void GLUI_TextBox::enable()
 {
   GLUI_Control::enable();
   if (scrollbar) scrollbar->enable();
@@ -326,7 +327,7 @@ void GLUI_TextBox::enable( void )
 
 /****************************** GLUI_TextBox::disable() **********/
 
-void GLUI_TextBox::disable( void )
+void GLUI_TextBox::disable()
 {
   GLUI_Control::disable();
   if (scrollbar) scrollbar->disable();
@@ -355,7 +356,7 @@ void    GLUI_TextBox::activate( int how )
 
 /****************************** GLUI_TextBox::deactivate() **********/
 
-void    GLUI_TextBox::deactivate( void )
+void    GLUI_TextBox::deactivate()
 {
   active = false;
 
@@ -483,7 +484,7 @@ void    GLUI_TextBox::draw( int x, int y )
 
   draw_insertion_pt();
   if (scrollbar) {
-    scrollbar->set_int_limits(MAX(0,num_lines/*-1*/-visible_lines),0);
+    scrollbar->set_int_limits(std::max(0,num_lines/*-1*/-visible_lines),0);
     glPushMatrix();
     glTranslatef(scrollbar->x_abs-x_abs, scrollbar->y_abs-y_abs,0.0);
     scrollbar->draw_scroll();
@@ -495,7 +496,7 @@ void    GLUI_TextBox::draw( int x, int y )
 
 /************************** GLUI_TextBox::update_substring_bounds() *********/
 
-int    GLUI_TextBox::update_substring_bounds( void )
+int    GLUI_TextBox::update_substring_bounds()
 {
   int box_width;
   int text_len = text.length();
@@ -507,8 +508,8 @@ int    GLUI_TextBox::update_substring_bounds( void )
   /*** Calculate the width of the usable area of the edit box ***/
   box_width = get_box_width();
 
-  CLAMP( substring_end, 0, MAX(text_len-1,0) );
-  CLAMP( substring_start, 0, MAX(text_len-1,0) );
+  CLAMP( substring_end, 0, std::max(text_len-1,0) );
+  CLAMP( substring_start, 0, std::max(text_len-1,0) );
 
   if ( debug )    dump( stdout, "-> UPDATE SS" );
 
@@ -560,7 +561,7 @@ int    GLUI_TextBox::update_substring_bounds( void )
 
 /********************************* GLUI_TextBox::update_x_offsets() *********/
 
-void    GLUI_TextBox::update_x_offsets( void )
+void    GLUI_TextBox::update_x_offsets()
 {
 }
 
@@ -579,8 +580,8 @@ void    GLUI_TextBox::draw_text( int x, int y )
   text_x = 2 + GLUI_TEXTBOX_BOXINNERMARGINX;
 
   /** Find lower and upper selection bounds **/
-  sel_lo = MIN(sel_start, sel_end );
-  sel_hi = MAX(sel_start, sel_end );
+  sel_lo = std::min(sel_start, sel_end );
+  sel_hi = std::max(sel_start, sel_end );
 
   int sel_x_start, sel_x_end, delta;
 
@@ -753,7 +754,7 @@ int  GLUI_TextBox::find_insertion_pt( int x, int y )
 
 int GLUI_TextBox::get_box_width()
 {
-  return MAX( this->w
+  return std::max( this->w
               - 4     /*  2 * the two-line box border */
               - 2 * GLUI_TEXTBOX_BOXINNERMARGINX, 0 );
 
@@ -761,7 +762,7 @@ int GLUI_TextBox::get_box_width()
 
 /******************************** GLUI_TextBox::draw_insertion_pt() *********/
 
-void     GLUI_TextBox::draw_insertion_pt( void )
+void     GLUI_TextBox::draw_insertion_pt()
 {
   int curr_x, box_width, text_length, eol, sol, line;
 
@@ -829,7 +830,7 @@ void     GLUI_TextBox::draw_insertion_pt( void )
                                           between the text and the box       **/
 
   curr_x += substring_width(sol,insertion_pt-1);
-  if (insertion_pt == text.length() && text[text.length()-1] == '\n'
+  if ((insertion_pt == text.length() && text[text.length()-1] == '\n')
       || curr_x-this->x_abs > (w - 2 - GLUI_TEXTBOX_BOXINNERMARGINX)) { // Insert on the next line
     curr_x = this->x_abs + GLUI_TEXTBOX_BOXINNERMARGINX;
     line++;
@@ -878,7 +879,7 @@ int  GLUI_TextBox::substring_width( int start, int end, int initial_width )
 
 /***************************** GLUI_TextBox::update_and_draw_text() ********/
 
-void   GLUI_TextBox::update_and_draw_text( void )
+void   GLUI_TextBox::update_and_draw_text()
 {
   //update_substring_bounds();
   /*  printf( "ss: %d/%d\n", substring_start, substring_end );                  */
@@ -1031,7 +1032,7 @@ void   GLUI_TextBox::clear_substring( int start, int end )
 
 /************************************ GLUI_TextBox::update_size() **********/
 
-void   GLUI_TextBox::update_size( void )
+void   GLUI_TextBox::update_size()
 {
   if ( NOT glui )
     return;
@@ -1043,7 +1044,7 @@ void   GLUI_TextBox::update_size( void )
 
 /****************************** GLUI_TextBox::set_text() **********/
 
-void    GLUI_TextBox::set_text( const char *new_text )
+void    GLUI_TextBox::set_text( const GLUI_String &new_text )
 {
   text = new_text;
 
@@ -1067,13 +1068,13 @@ void    GLUI_TextBox::set_text( const char *new_text )
 
 /*************************************** GLUI_TextBox::dump() **************/
 
-void   GLUI_TextBox::dump( FILE *out, char *name )
+void   GLUI_TextBox::dump( FILE *out, const GLUI_String &name )
 {
   fprintf( out,
-       "%s (edittext@%p):   line:%d ins_pt:%d  subs:%d/%d  sel:%d/%d   len:%d\n",
-       name, this, curr_line,
+       "%s (edittext@%p):   line:%d ins_pt:%d  subs:%d/%d  sel:%d/%d   len:%lu\n",
+       name.c_str(), this, curr_line,
        insertion_pt, substring_start, substring_end, sel_start, sel_end,
-       text.length());
+       (long unsigned) text.length());
 }
 
 

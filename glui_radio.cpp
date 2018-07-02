@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -32,6 +32,9 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
+
+#include "tinyformat.h"
+
 #include <cassert>
 
 /****************************** GLUI_RadioGroup::GLUI_RadioGroup() **********/
@@ -41,7 +44,6 @@ GLUI_RadioGroup::GLUI_RadioGroup(GLUI_Node *parent,
                                  int id, GLUI_CB cb)
 {
   common_init();
-  GLUI_String      buf;
 
   set_ptr_val( value_ptr );
   if ( value_ptr ) {
@@ -53,7 +55,7 @@ GLUI_RadioGroup::GLUI_RadioGroup(GLUI_Node *parent,
   }
 
   user_id    = id;
-  glui_format_str( buf, "RadioGroup: %p", this );
+  GLUI_String buf = tfm::format("RadioGroup: %p", this );
   set_name( buf.c_str() );
   callback   = cb;
 
@@ -109,7 +111,7 @@ void    GLUI_RadioGroup::draw_group( int translate )
 
 /****************************** GLUI_RadioGroup::set_name() **********/
 
-void    GLUI_RadioGroup::set_name( const char *text )
+void    GLUI_RadioGroup::set_name( const GLUI_String &text )
 {
   name = text;
 
@@ -146,7 +148,7 @@ void    GLUI_RadioGroup::set_selected( int int_val )
 
 /************************ GLUI_RadioButton::GLUI_RadioButton() **********/
 
-GLUI_RadioButton::GLUI_RadioButton( GLUI_RadioGroup *grp, const char *name )
+GLUI_RadioButton::GLUI_RadioButton( GLUI_RadioGroup *grp, const GLUI_String &name )
 {
   common_init();
 
@@ -168,6 +170,15 @@ GLUI_RadioButton::GLUI_RadioButton( GLUI_RadioGroup *grp, const char *name )
                                            updating all its buttons */
 }
 
+void GLUI_RadioButton::common_init()
+{
+  name           = tfm::format("RadioButton: %p", this );
+  h              = GLUI_RADIOBUTTON_SIZE;
+  group          = NULL;
+  orig_value     = -1;
+  text_x_offset  = 18;
+  can_activate   = true;
+}
 
 /************************ GLUI_RadioButton::mouse_down_handler() **********/
 
@@ -265,7 +276,7 @@ void    GLUI_RadioButton::draw( int x, int y )
 
 /************************************ GLUI_RadioButton::draw_checked() ******/
 
-void   GLUI_RadioButton::draw_checked( void )
+void   GLUI_RadioButton::draw_checked()
 {
   GLUI_DRAWINGSENTINAL_IDIOM
   if ( enabled )
@@ -278,7 +289,7 @@ void   GLUI_RadioButton::draw_checked( void )
 
 /*********************************** GLUI_RadioButton::draw_unchecked() ******/
 
-void   GLUI_RadioButton::draw_unchecked( void )
+void   GLUI_RadioButton::draw_unchecked()
 {
   GLUI_DRAWINGSENTINAL_IDIOM
 
@@ -292,7 +303,7 @@ void   GLUI_RadioButton::draw_unchecked( void )
 
 /**************************************** GLUI_RadioButton::draw_O() ********/
 
-void   GLUI_RadioButton::draw_O( void )
+void   GLUI_RadioButton::draw_O()
 {
   GLUI_DRAWINGSENTINAL_IDIOM
   int i, j;
@@ -307,7 +318,7 @@ void   GLUI_RadioButton::draw_O( void )
 
 /******************************** GLUI_RadioButton::update_size() **********/
 
-void   GLUI_RadioButton::update_size( void )
+void   GLUI_RadioButton::update_size()
 {
   int text_size;
 
@@ -323,7 +334,7 @@ void   GLUI_RadioButton::update_size( void )
 
 /************************* GLUI_RadioButton::draw_active_area() **************/
 
-void    GLUI_RadioButton::draw_active_area( void )
+void    GLUI_RadioButton::draw_active_area()
 {
   GLUI_DRAWINGSENTINAL_IDIOM
   int text_width, left, right;

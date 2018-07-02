@@ -28,6 +28,9 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
+
+#include <algorithm>
+
 #include <cmath>
 #include <cassert>
 
@@ -48,7 +51,7 @@ enum {
 /****************************** GLUI_Scrollbar::GLUI_Scrollbar() **********/
 // Constructor, no live var
 GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent,
-                                const char *name,
+                                const GLUI_String &name,
                                 int horz_vert,
                                 int data_type,
                                 int id, GLUI_CB callback
@@ -61,7 +64,7 @@ GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent,
 
 /****************************** GLUI_Scrollbar::GLUI_Scrollbar() **********/
 // Constructor, int live var
-GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const char *name,
+GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const GLUI_String &name,
                                 int horz_vert,
                                 int *live_var,
                                 int id, GLUI_CB callback
@@ -74,7 +77,7 @@ GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const char *name,
 
 /****************************** GLUI_Scrollbar::GLUI_Scrollbar() **********/
 // Constructor, float live var
-GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const char *name,
+GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const GLUI_String &name,
                                 int horz_vert,
                                 float *live_var,
                                 int id, GLUI_CB callback
@@ -86,7 +89,7 @@ GLUI_Scrollbar::GLUI_Scrollbar( GLUI_Node *parent, const char *name,
 }
 
 /****************************** GLUI_Scrollbar::common_init() **********/
-void GLUI_Scrollbar::common_init(void)
+void GLUI_Scrollbar::common_init()
 {
    horizontal	= true;
    h		= GLUI_SCROLL_ARROW_HEIGHT;
@@ -117,7 +120,7 @@ void GLUI_Scrollbar::common_init(void)
 /****************************** GLUI_Scrollbar::common_construct() **********/
 void GLUI_Scrollbar::common_construct(
   GLUI_Node *parent,
-  const char *name,
+  const GLUI_String &name,
   int horz_vert,
   int data_type,
   void *data,
@@ -133,8 +136,8 @@ void GLUI_Scrollbar::common_construct(
     float lo = 0.0f, hi=1.0f;
     if (data) {
       float d = *(float*)(data);
-      lo = MIN(lo, d);
-      hi = MAX(hi, d);
+      lo = std::min(lo, d);
+      hi = std::max(hi, d);
     }
     this->set_float_limits(lo,hi);
     this->set_float_val(lo);
@@ -143,8 +146,8 @@ void GLUI_Scrollbar::common_construct(
     int lo = 0, hi=100;
     if (data) {
       int d = *(int*)(data);
-      lo = MIN(lo, d);
-      hi = MAX(hi, d);
+      lo = std::min(lo, d);
+      hi = std::max(hi, d);
     }
     this->set_int_limits(lo,hi);
     this->set_int_val(0);
@@ -193,8 +196,8 @@ int    GLUI_Scrollbar::mouse_down_handler( int local_x, int local_y )
 #if 1
   if ( data_type == GLUI_SCROLL_INT ) {
     // Allow for possibility of reversed limits
-    int lo = MIN(int_min,int_max);
-    int hi = MAX(int_min,int_max);
+    int lo = std::min(int_min,int_max);
+    int hi = std::max(int_min,int_max);
     int increase = int_min < int_max ? 1 : -1;
     int new_val = int_val;
     if ( state == GLUI_SCROLL_STATE_UP ) {
@@ -532,7 +535,7 @@ int    GLUI_Scrollbar::special_handler( int key,int modifiers )
 
 /************************************ GLUI_Scrollbar::update_size() **********/
 
-void   GLUI_Scrollbar::update_size( void )
+void   GLUI_Scrollbar::update_size()
 {
   if (horizontal) {
     h = GLUI_SCROLL_ARROW_HEIGHT;
@@ -597,7 +600,7 @@ int    GLUI_Scrollbar::find_arrow( int local_x, int local_y )
 
 /***************************************** GLUI_Scrollbar::do_click() **********/
 
-void    GLUI_Scrollbar::do_click( void )
+void    GLUI_Scrollbar::do_click()
 {
   int    direction = 0;
 
@@ -692,7 +695,7 @@ void    GLUI_Scrollbar::do_drag( int x, int y )
 
 /***************************************** GLUI_Scrollbar::needs_idle() ******/
 
-bool GLUI_Scrollbar::needs_idle( void ) const
+bool GLUI_Scrollbar::needs_idle() const
 {
   if  (state == GLUI_SCROLL_STATE_UP OR state == GLUI_SCROLL_STATE_DOWN ) {
     return true;
@@ -704,7 +707,7 @@ bool GLUI_Scrollbar::needs_idle( void ) const
 
 /***************************************** GLUI_Scrollbar::idle() **********/
 
-void    GLUI_Scrollbar::idle( void )
+void    GLUI_Scrollbar::idle()
 {
   if ( NOT needs_idle() )
     return;
@@ -715,7 +718,7 @@ void    GLUI_Scrollbar::idle( void )
 
 /************************************ GLUI_Scrollbar::do_callbacks() **********/
 
-void    GLUI_Scrollbar::do_callbacks( void )
+void    GLUI_Scrollbar::do_callbacks()
 {
 
   /*    *******************************************/
@@ -749,8 +752,8 @@ void    GLUI_Scrollbar::do_callbacks( void )
 void   GLUI_Scrollbar::set_float_val( float new_val )
 {
   // Allow for the possibility that the limits are reversed
-  float hi = MAX(float_min,float_max);
-  float lo = MIN(float_min,float_max);
+  float hi = std::max(float_min,float_max);
+  float lo = std::min(float_min,float_max);
   if (new_val > hi)
     new_val = hi;
   if (new_val < lo)
@@ -771,8 +774,8 @@ void   GLUI_Scrollbar::set_float_val( float new_val )
 void   GLUI_Scrollbar::set_int_val( int new_val )
 {
   // Allow for the possibility that the limits are reversed
-  int hi = MAX(int_min,int_max);
-  int lo = MIN(int_min,int_max);
+  int hi = std::max(int_min,int_max);
+  int lo = std::min(int_min,int_max);
   if (new_val > hi)
     new_val = hi;
   if (new_val < lo)
@@ -796,8 +799,8 @@ void   GLUI_Scrollbar::set_float_limits( float low, float high, int limit_type )
   float_min = low;
   float_max = high;
   // Allow for possiblitly of reversed limits
-  float lo = MIN(low,high);
-  float hi = MAX(low,high);
+  float lo = std::min(low,high);
+  float hi = std::max(low,high);
   if (float_val<lo) set_float_val(lo);
   if (float_val>hi) set_float_val(hi);
 }
@@ -813,8 +816,8 @@ void   GLUI_Scrollbar::set_int_limits( int low, int high, int limit_type )
   int_min = low;
   int_max = high;
   // Allow for possiblitly of reversed limits
-  int lo = MIN(low,high);
-  int hi = MAX(low,high);
+  int lo = std::min(low,high);
+  int hi = std::max(low,high);
   if (int_val<lo) set_int_val(lo);
   if (int_val>hi) set_int_val(hi);
   float_min = low;
@@ -824,7 +827,7 @@ void   GLUI_Scrollbar::set_int_limits( int low, int high, int limit_type )
 
 /*********************************** GLUI_Scrollbar::reset_growth() *************/
 
-void    GLUI_Scrollbar::reset_growth( void )
+void    GLUI_Scrollbar::reset_growth()
 {
   growth = fabs(float_max - float_min) / float(GLUI_SCROLL_GROWTH_STEPS);
   if (data_type == GLUI_SCROLL_INT && growth<1) growth=1;
@@ -833,7 +836,7 @@ void    GLUI_Scrollbar::reset_growth( void )
 
 /******************************* GLUI_Scrollbar::increase_growth() *************/
 
-void    GLUI_Scrollbar::increase_growth( void )
+void    GLUI_Scrollbar::increase_growth()
 {
   float range=0;
   if (data_type==GLUI_SCROLL_FLOAT)

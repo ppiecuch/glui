@@ -14,6 +14,12 @@
 #include <string.h>
 #include <GL/glui.h>
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 /** These are the live variables passed into GLUI ***/
 int   wireframe = 0;
 int   segments = 8;
@@ -22,7 +28,7 @@ int   main_window;
 
 /***************************************** myGlutIdle() ***********/
 
-void myGlutIdle( void )
+void myGlutIdle()
 {
   /* According to the GLUT specification, the current window is 
      undefined during an idle callback.  So we need to explicitly change
@@ -52,7 +58,7 @@ void myGlutReshape( int x, int y )
 
 /***************************************** myGlutDisplay() *****************/
 
-void myGlutDisplay( void )
+void myGlutDisplay()
 {
   static float rotationX = 0.0, rotationY = 0.0;
 

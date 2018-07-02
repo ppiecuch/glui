@@ -7,8 +7,8 @@
 
   ---------------------------------------------------------------------
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -83,7 +83,7 @@ public:
   float  get_angle() const;                /* set rot angle (degrees)         */
   vec3   get_axis()  const;                /* get axis                        */
 
-  void   print( FILE *file, const char *name ) const;  /* print to a file     */
+  void   print( FILE *file, const std::string &name ) const;  /* print to a file  */
 
         float &operator [] (int i);        /* indexing                        */
   const float &operator [] (int i) const;  /* indexing                        */

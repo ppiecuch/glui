@@ -7,8 +7,8 @@
   GLUI User Interface Toolkit
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -238,8 +238,8 @@ vec3 quat::get_axis() const
 
 /******************************************* quat::print() ************/
 
-void quat::print(FILE *dest, const char *name) const
+void quat::print(FILE *dest, const std::string &name) const
 {
     fprintf( dest, "%s:   v:<%3.2f %3.2f %3.2f>  s:%3.2f\n",
-        name, v[0], v[1], v[2], s );
+        name.c_str(), v[0], v[1], v[2], s );
 }

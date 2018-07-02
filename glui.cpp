@@ -9,8 +9,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -31,6 +31,9 @@
 *****************************************************************************/
 #include "glui_internal_control.h"
 
+#include "tinyformat.h"
+
+#include <algorithm>
 
 /**
  Note: moving this routine here from glui_add_controls.cpp prevents the linker
@@ -106,7 +109,7 @@ GLUI_Master_Object GLUI_Master;
   Probably a silly routine.  Called after all event handling callbacks.
 */
 
-static void finish_drawing(void)
+static void finish_drawing()
 {
 	glFinish();
 }
@@ -121,7 +124,7 @@ void GLUI_CB::operator()(GLUI_Control*ctrl) const
 
 /************************************************ GLUI::GLUI() **********/
 
-int GLUI::init( const char *text, long flags, int x, int y, int parent_window )
+int GLUI::init( const GLUI_String &text, long flags, int x, int y, int parent_window )
 {
   int old_glut_window;
 
@@ -178,13 +181,13 @@ int GLUI::init( const char *text, long flags, int x, int y, int parent_window )
 
 /**************************** GLUI_Main::create_standalone_window() ********/
 
-void GLUI_Main::create_standalone_window( const char *name, int x, int y )
+void GLUI_Main::create_standalone_window( const GLUI_String &name, int x, int y )
 {
   glutInitWindowSize( 100, 100 );
   if ( x >= 0 OR y >= 0 )
     glutInitWindowPosition( x, y );
   glutInitDisplayMode( GLUT_RGB | GLUT_DOUBLE );
-  glut_window_id = glutCreateWindow( name );
+  glut_window_id = glutCreateWindow( name.c_str() );
 }
 
 
@@ -199,24 +202,24 @@ void GLUI_Main::create_subwindow( int parent_window, int window_alignment )
 
 /**************************** GLUI_Main::setup_default_glut_callbacks() *****/
 
-void GLUI_Main::setup_default_glut_callbacks( void )
+void GLUI_Main::setup_default_glut_callbacks()
 {
-  glutDisplayFunc( glui_display_func );
-  glutReshapeFunc( glui_reshape_func );
-  glutKeyboardFunc( glui_keyboard_func );
-  glutSpecialFunc( glui_special_func );
-  glutMouseFunc( glui_mouse_func );
-  glutMotionFunc( glui_motion_func );
-  glutPassiveMotionFunc( glui_passive_motion_func );
-  glutEntryFunc( glui_entry_func );
-  glutVisibilityFunc( glui_visibility_func );
-  /*  glutIdleFunc( glui_idle_func );    // FIXME!  100% CPU usage!      */
+  glutDisplayFunc( display_func );
+  glutReshapeFunc( reshape_func );
+  glutKeyboardFunc( keyboard_func );
+  glutSpecialFunc( special_func );
+  glutMouseFunc( mouse_func );
+  glutMotionFunc( motion_func );
+  glutPassiveMotionFunc( passive_motion_func );
+  glutEntryFunc( entry_func );
+  glutVisibilityFunc( visibility_func );
+  /*  glutIdleFunc( idle_func );    // FIXME!  100% CPU usage!      */
 }
 
 
 /********************************************** glui_display_func() ********/
 
-void glui_display_func(void)
+void GLUI_Main::display_func()
 {
   GLUI *glui;
 
@@ -236,7 +239,7 @@ void glui_display_func(void)
 
 /********************************************** glui_reshape_func() ********/
 
-void glui_reshape_func(int w,int h )
+void GLUI_Main::reshape_func(int w,int h )
 {
   GLUI             *glui;
   GLUI_Glut_Window *glut_window;
@@ -276,7 +279,7 @@ void glui_reshape_func(int w,int h )
 
 /********************************************** glui_keyboard_func() ********/
 
-void glui_keyboard_func(unsigned char key, int x, int y)
+void GLUI_Main::keyboard_func(unsigned char key, int x, int y)
 {
   GLUI              *glui;
   int                current_window;
@@ -314,7 +317,7 @@ void glui_keyboard_func(unsigned char key, int x, int y)
 
 /************************************************ glui_special_func() ********/
 
-void glui_special_func(int key, int x, int y)
+void GLUI_Main::special_func(int key, int x, int y)
 {
   GLUI              *glui;
   int                current_window;
@@ -354,7 +357,7 @@ void glui_special_func(int key, int x, int y)
 
 /********************************************** glui_mouse_func() ********/
 
-void glui_mouse_func(int button, int state, int x, int y)
+void GLUI_Main::mouse_func(int button, int state, int x, int y)
 {
   GLUI              *glui;
   int                current_window;
@@ -384,7 +387,7 @@ void glui_mouse_func(int button, int state, int x, int y)
 
 /********************************************** glui_motion_func() ********/
 
-void glui_motion_func(int x, int y)
+void GLUI_Main::motion_func(int x, int y)
 {
   GLUI *glui;
 
@@ -400,7 +403,7 @@ void glui_motion_func(int x, int y)
 
 /**************************************** glui_passive_motion_func() ********/
 
-void glui_passive_motion_func(int x, int y)
+void GLUI_Main::passive_motion_func(int x, int y)
 {
   GLUI *glui;
 
@@ -415,7 +418,7 @@ void glui_passive_motion_func(int x, int y)
 
 /********************************************** glui_entry_func() ********/
 
-void glui_entry_func(int state)
+void GLUI_Main::entry_func(int state)
 {
   GLUI *glui;
 
@@ -429,7 +432,7 @@ void glui_entry_func(int state)
 
 /******************************************** glui_visibility_func() ********/
 
-void glui_visibility_func(int state)
+void GLUI_Main::visibility_func(int state)
 {
   GLUI *glui;
 
@@ -447,7 +450,7 @@ void glui_visibility_func(int state)
 /********************************************** glui_idle_func() ********/
 /* Send idle event to each glui, then to the main window            */
 
-void glui_idle_func(void)
+void GLUI_Main::idle_func()
 {
   GLUI *glui;
 
@@ -497,7 +500,7 @@ GLUI_Master_Object::~GLUI_Master_Object()
 
 /*********************************** GLUI_Master_Object::create_glui() ******/
 
-GLUI *GLUI_Master_Object::create_glui( const char *name, long flags,int x,int y )
+GLUI *GLUI_Master_Object::create_glui( const GLUI_String &name, long flags,int x,int y )
 {
   GLUI *new_glui = new GLUI;
   new_glui->init( name, flags, x, y, -1 );
@@ -512,8 +515,7 @@ GLUI *GLUI_Master_Object::create_glui_subwindow( int parent_window,
 						   long flags )
 {
   GLUI *new_glui = new GLUI;
-  GLUI_String new_name;
-  glui_format_str( new_name, "subwin_%p", this );
+  GLUI_String new_name = tfm::format("subwin_%p", this );
 
   new_glui->init( new_name.c_str(), flags | GLUI_SUBWINDOW, 0,0,
 		    parent_window );
@@ -542,7 +544,7 @@ GLUI  *GLUI_Master_Object::find_glui_by_window_id( int window_id )
 
 /******************************************** GLUI_Main::display() **********/
 
-void    GLUI_Main::display( void )
+void    GLUI_Main::display()
 {
   int       win_w, win_h;
 
@@ -615,21 +617,12 @@ void    GLUI_Main::display( void )
   }
 }
 
-
-
-
 /*************************************** _glutBitmapWidthString() **********/
 
-int _glutBitmapWidthString( void *font, const char *s )
+int _glutBitmapWidthString( void *font, const GLUI_String &s )
 {
-  const char *p = s;
   int  width = 0;
-
-  while( *p != '\0' )  {
-    width += glutBitmapWidth( font, *p );
-    p++;
-  }
-
+  for (auto i : s) width += glutBitmapWidth( font, i );
   return width;
 }
 
@@ -637,17 +630,10 @@ int _glutBitmapWidthString( void *font, const char *s )
 /* Displays the contents of a string using GLUT's bitmap character function */
 /* Does not handle newlines                                             */
 
-void _glutBitmapString( void *font, const char *s )
+void _glutBitmapString( void *font, const GLUI_String &s )
 {
-  const char *p = s;
-
-  while( *p != '\0' )  {
-    glutBitmapCharacter( font, *p );
-    p++;
-  }
+  for (auto i : s) glutBitmapCharacter( font, i );
 }
-
-
 
 /****************************** GLUI_Main::reshape() **************/
 
@@ -895,7 +881,7 @@ void    GLUI_Main::visibility(int state)
 
 /****************************** GLUI_Main::idle() **************/
 
-void    GLUI_Main::idle(void)
+void    GLUI_Main::idle()
 {
   /*** Pass the idle event onto the active control, if any ***/
 
@@ -918,7 +904,7 @@ void    GLUI_Main::idle(void)
   }
 }
 
-int  GLUI_Main::needs_idle( void )
+int  GLUI_Main::needs_idle()
 {
   return active_control != NULL && active_control->needs_idle();
 }
@@ -982,7 +968,7 @@ GLUI_Control  *GLUI_Main::find_control( int x, int y )
 
 /************************************* GLUI_Main::pack_controls() ***********/
 
-void      GLUI_Main::pack_controls( void )
+void      GLUI_Main::pack_controls()
 {
   main_panel->pack(0,0);
 
@@ -1005,16 +991,16 @@ void      GLUI_Main::pack_controls( void )
 
     if ( 1 ) {
       if ( TEST_AND(this->flags,GLUI_SUBWINDOW_TOP )) {
-	main_panel->w = MAX( main_panel->w, parent_w );
+	main_panel->w = std::max( main_panel->w, parent_w );
       }
       else if ( TEST_AND(this->flags,GLUI_SUBWINDOW_LEFT )) {
-	main_panel->h = MAX( main_panel->h, parent_h );
+	main_panel->h = std::max( main_panel->h, parent_h );
       }
       else if ( TEST_AND(this->flags,GLUI_SUBWINDOW_BOTTOM )) {
-	main_panel->w = MAX( main_panel->w, parent_w );
+	main_panel->w = std::max( main_panel->w, parent_w );
       }
       else if ( TEST_AND(this->flags,GLUI_SUBWINDOW_RIGHT )) {
-	main_panel->h = MAX( main_panel->h, parent_h );
+	main_panel->h = std::max( main_panel->h, parent_h );
       }
     }
   }
@@ -1053,7 +1039,7 @@ void   GLUI::set_main_gfx_window( int window_id )
 
 /********************************* GLUI_Main::post_update_main_gfx() ********/
 
-void   GLUI_Main::post_update_main_gfx( void )
+void   GLUI_Main::post_update_main_gfx()
 {
   int old_window;
 
@@ -1088,7 +1074,7 @@ bool	     GLUI_Main::should_redraw_now(GLUI_Control *ctl)
 
 /********************************* GLUI_Main::set_current_draw_buffer() ********/
 
-int          GLUI_Main::set_current_draw_buffer( void )
+int          GLUI_Main::set_current_draw_buffer()
 {
   /* Save old buffer */
   GLint state;
@@ -1112,7 +1098,7 @@ void         GLUI_Main::restore_draw_buffer( int buffer_state )
 
 /******************************************** GLUI_Main::GLUI_Main() ********/
 
-GLUI_Main::GLUI_Main( void )
+GLUI_Main::GLUI_Main()
 {
   mouse_button_down       = false;
   w                       = 0;
@@ -1240,7 +1226,7 @@ void         GLUI_Main::activate_control( GLUI_Control *control, int how )
 
 /************************* GLUI_Main::deactivate_current_control() **********/
 
-void         GLUI_Main::deactivate_current_control( void )
+void         GLUI_Main::deactivate_current_control()
 {
   int orig;
 
@@ -1426,7 +1412,7 @@ GLUI_Control  *GLUI_Main::find_prev_control( GLUI_Control *control )
 
 /************************* GLUI_Master_Object::set_glutIdleFunc() ***********/
 
-void    GLUI_Master_Object::set_glutIdleFunc(void (*f)(void))
+void    GLUI_Master_Object::set_glutIdleFunc(void (*f)())
 {
   glut_idle_CB = f;
   GLUI_Master.glui_setIdleFuncIfNecessary();
@@ -1435,7 +1421,7 @@ void    GLUI_Master_Object::set_glutIdleFunc(void (*f)(void))
 
 /**************************************** GLUI::disable() ********************/
 
-void   GLUI::disable( void )
+void   GLUI::disable()
 {
   deactivate_current_control();
   main_panel->disable();
@@ -1444,7 +1430,7 @@ void   GLUI::disable( void )
 
 /******************************************** GLUI::sync_live() **************/
 
-void   GLUI::sync_live( void )
+void   GLUI::sync_live()
 {
   main_panel->sync_live(true, true);
 }
@@ -1452,7 +1438,7 @@ void   GLUI::sync_live( void )
 
 /********************************* GLUI_Master_Object::sync_live_all() *****/
 
-void   GLUI_Master_Object::sync_live_all( void )
+void   GLUI_Master_Object::sync_live_all()
 {
   GLUI *glui;
 
@@ -1468,7 +1454,7 @@ void   GLUI_Master_Object::sync_live_all( void )
 
 /************************************* GLUI_Master_Object::close() **********/
 
-void   GLUI_Master_Object::close_all( void )
+void   GLUI_Master_Object::close_all()
 {
   GLUI *glui;
 
@@ -1484,7 +1470,7 @@ void   GLUI_Master_Object::close_all( void )
 
 /************************************* GLUI_Main::close_internal() **********/
 
-void   GLUI_Main::close_internal( void )
+void   GLUI_Main::close_internal()
 {
   glutDestroyWindow(glutGetWindow()); /** Close this window **/
 
@@ -1511,7 +1497,7 @@ void   GLUI_Main::close_internal( void )
 
 /************************************************** GLUI::close() **********/
 
-void   GLUI::close( void )
+void   GLUI::close()
 {
   int   old_glut_window;
 
@@ -1527,7 +1513,7 @@ void   GLUI::close( void )
 
 /************************** GLUI_Main::check_subwindow_position() **********/
 
-void   GLUI_Main::check_subwindow_position( void )
+void   GLUI_Main::check_subwindow_position()
 {
   /*** Reposition this window if subwindow ***/
   if ( TEST_AND( this->flags, GLUI_SUBWINDOW ) ) {
@@ -1626,7 +1612,7 @@ void   GLUI_Main::check_subwindow_position( void )
 /* This gets called by the user from a GLUT reshape callback.  So we look */
 /* for subwindows that belong to the current window                   */
 
-void  GLUI_Master_Object::reshape( void )
+void  GLUI_Master_Object::reshape()
 {
   GLUI *glui;
   int   current_window;
@@ -1652,8 +1638,8 @@ void  GLUI_Master_Object::reshape( void )
 
 void GLUI_Master_Object::set_glutReshapeFunc(void (*f)(int width, int height))
 {
-  glutReshapeFunc( glui_reshape_func );
-  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_RESHAPE, (void*) f);
+  glutReshapeFunc( GLUI_Main::reshape_func );
+  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_RESHAPE, reinterpret_cast<void(*)()>(f));
 }
 
 
@@ -1662,8 +1648,8 @@ void GLUI_Master_Object::set_glutReshapeFunc(void (*f)(int width, int height))
 void GLUI_Master_Object::set_glutKeyboardFunc(void (*f)(unsigned char key,
 							int x, int y))
 {
-  glutKeyboardFunc( glui_keyboard_func );
-  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_KEYBOARD, (void*) f);
+  glutKeyboardFunc( GLUI_Main::keyboard_func );
+  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_KEYBOARD, reinterpret_cast<void(*)()>(f));
 }
 
 
@@ -1672,8 +1658,8 @@ void GLUI_Master_Object::set_glutKeyboardFunc(void (*f)(unsigned char key,
 void GLUI_Master_Object::set_glutSpecialFunc(void (*f)(int key,
 						       int x, int y))
 {
-  glutSpecialFunc( glui_special_func );
-  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_SPECIAL, (void*) f);
+  glutSpecialFunc( GLUI_Main::special_func );
+  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_SPECIAL, reinterpret_cast<void(*)()>(f));
 }
 
 
@@ -1682,15 +1668,28 @@ void GLUI_Master_Object::set_glutSpecialFunc(void (*f)(int key,
 void GLUI_Master_Object::set_glutMouseFunc(void (*f)(int button, int state,
 						     int x, int y))
 {
-  glutMouseFunc( glui_mouse_func );
-  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_MOUSE, (void*) f);
+  glutMouseFunc( GLUI_Main::mouse_func );
+  add_cb_to_glut_window( glutGetWindow(), GLUI_GLUT_MOUSE, reinterpret_cast<void(*)()>(f));
 }
 
+void GLUI_Master_Object::set_glutDisplayFunc(void (*f)(void)) {glutDisplayFunc(f);}
+void GLUI_Master_Object::set_glutTimerFunc(unsigned int millis, void (*f)(int value), int value)
+{ ::glutTimerFunc(millis,f,value);}
+void GLUI_Master_Object::set_glutOverlayDisplayFunc(void(*f)(void)){glutOverlayDisplayFunc(f);}
+void GLUI_Master_Object::set_glutSpaceballMotionFunc(Int3_CB f)  {glutSpaceballMotionFunc(f);}
+void GLUI_Master_Object::set_glutSpaceballRotateFunc(Int3_CB f)  {glutSpaceballRotateFunc(f);}
+void GLUI_Master_Object::set_glutSpaceballButtonFunc(Int2_CB f)  {glutSpaceballButtonFunc(f);}
+void GLUI_Master_Object::set_glutTabletMotionFunc(Int2_CB f)        {glutTabletMotionFunc(f);}
+void GLUI_Master_Object::set_glutTabletButtonFunc(Int4_CB f)        {glutTabletButtonFunc(f);}
+void GLUI_Master_Object::set_glutMenuStatusFunc(Int3_CB f)            {glutMenuStatusFunc(f);}
+void GLUI_Master_Object::set_glutMenuStateFunc(Int1_CB f)              {glutMenuStateFunc(f);}
+void GLUI_Master_Object::set_glutButtonBoxFunc(Int2_CB f)              {glutButtonBoxFunc(f);}
+void GLUI_Master_Object::set_glutDialsFunc(Int2_CB f)                      {glutDialsFunc(f);}  
 
 /****************************** glui_parent_window_reshape_func() **********/
 /* This is the reshape callback for a window that contains subwindows      */
 
-void glui_parent_window_reshape_func( int w, int h )
+void GLUI_Main::parent_window_reshape_func( int w, int h )
 {
   int   current_window;
   GLUI  *glui;
@@ -1722,7 +1721,7 @@ void glui_parent_window_reshape_func( int w, int h )
 
 /****************************** glui_parent_window_keyboard_func() **********/
 
-void glui_parent_window_keyboard_func(unsigned char key, int x, int y)
+void GLUI_Main::parent_window_keyboard_func(unsigned char key, int x, int y)
 {
   /*  printf( "glui_parent_window_keyboard_func: %d\n", glutGetWindow() );          */
 
@@ -1757,7 +1756,7 @@ void glui_parent_window_keyboard_func(unsigned char key, int x, int y)
 
 /****************************** glui_parent_window_special_func() **********/
 
-void glui_parent_window_special_func(int key, int x, int y)
+void GLUI_Main::parent_window_special_func(int key, int x, int y)
 {
   /*printf( "glui_parent_window_special_func: %d\n", glutGetWindow() );          */
 
@@ -1790,7 +1789,7 @@ void glui_parent_window_special_func(int key, int x, int y)
 
 /****************************** glui_parent_window_mouse_func() **********/
 
-void glui_parent_window_mouse_func(int button, int state, int x, int y)
+void GLUI_Main::parent_window_mouse_func(int button, int state, int x, int y)
 {
   int   current_window;
   GLUI  *glui;
@@ -1843,7 +1842,7 @@ GLUI_Glut_Window  *GLUI_Master_Object::find_glut_window( int window_id )
 /******************** GLUI_Master_Object::add_cb_to_glut_window() **********/
 
 void     GLUI_Master_Object::add_cb_to_glut_window(int window_id,
-						   int cb_type,void *cb)
+						   int cb_type, void(*cb)())
 {
   GLUI_Glut_Window *window;
 
@@ -1899,7 +1898,7 @@ void  GLUI_Master_Object::set_left_button_glut_menu_control(
 
 /******************************* GLUI_Main::set_ortho_projection() **********/
 
-void  GLUI_Main::set_ortho_projection( void )
+void  GLUI_Main::set_ortho_projection()
 {
   int win_h, win_w;
 
@@ -1928,7 +1927,7 @@ void  GLUI_Main::set_ortho_projection( void )
 
 /******************************* GLUI_Main::set_viewport() **********/
 
-void  GLUI_Main::set_viewport( void )
+void  GLUI_Main::set_viewport()
 {
   glViewport( 0, 0, main_panel->w, main_panel->h );
 }
@@ -1936,7 +1935,7 @@ void  GLUI_Main::set_viewport( void )
 
 /****************************** GLUI_Main::refresh() ****************/
 
-void    GLUI_Main::refresh( void )
+void    GLUI_Main::refresh()
 {
   int orig;
 
@@ -2016,10 +2015,10 @@ void     GLUI_Master_Object::get_viewport_area( int *x, int *y,
     curr_glui = (GLUI*) curr_glui->next();
   }
 
-  curr_x = MAX( 0, curr_x );
-  curr_y = MAX( 0, curr_y );
-  curr_w = MAX( 0, curr_w );
-  curr_h = MAX( 0, curr_h );
+  curr_x = std::max( 0, curr_x );
+  curr_y = std::max( 0, curr_y );
+  curr_w = std::max( 0, curr_w );
+  curr_h = std::max( 0, curr_h );
 
   *x = curr_x;
   *y = curr_y;
@@ -2030,19 +2029,19 @@ void     GLUI_Master_Object::get_viewport_area( int *x, int *y,
 
 /*****************GLUI_Master_Object::auto_set_main_gfx_viewport() **********/
 
-void           GLUI_Master_Object::auto_set_viewport( void )
+void           GLUI_Master_Object::auto_set_viewport()
 {
   int x, y, w, h;
 
   get_viewport_area( &x, &y, &w, &h );
-  glViewport( MAX(x,0), MAX(y,0), MAX(w,0), MAX(h,0) );
+  glViewport( std::max(x,0), std::max(y,0), std::max(w,0), std::max(h,0) );
 }
 
 
 
 /***************************************** GLUI::show() **********************/
 
-void            GLUI::show( void )
+void            GLUI::show()
 {
   int orig_window;
 
@@ -2057,7 +2056,7 @@ void            GLUI::show( void )
 
 /***************************************** GLUI::hide() **********************/
 
-void            GLUI::hide( void )
+void            GLUI::hide()
 {
   int orig_window;
 
@@ -2084,7 +2083,7 @@ GLUI_DrawingSentinal::~GLUI_DrawingSentinal() {
 }
 
 
-void GLUI_Master_Object::glui_setIdleFuncIfNecessary( void )
+void GLUI_Master_Object::glui_setIdleFuncIfNecessary()
 {
   GLUI *glui;
 
@@ -2103,7 +2102,7 @@ void GLUI_Master_Object::glui_setIdleFuncIfNecessary( void )
     }
   }
   if( necessary )
-    glutIdleFunc( glui_idle_func );
+    glutIdleFunc( GLUI_Main::idle_func );
   else
     glutIdleFunc( NULL );
 }

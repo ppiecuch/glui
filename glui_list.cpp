@@ -29,6 +29,9 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
+
+#include <algorithm>
+
 #include <cmath>
 #include <sys/timeb.h>
 
@@ -99,7 +102,7 @@ void GLUI_List::common_construct(
 int    GLUI_List::mouse_down_handler( int local_x, int local_y )
 {
   int tmp_line;
-  unsigned long int ms;
+  uint64_t ms;
   timeb time;
   ftime(&time);
   ms = time.millitm + (time.time)*1000;
@@ -116,15 +119,14 @@ int    GLUI_List::mouse_down_handler( int local_x, int local_y )
     if (scrollbar)
       scrollbar->set_int_val(curr_line);
     this->execute_callback();
-    if (associated_object != NULL)
-    {
+    if (associated_object != NULL) {
       if (cb_click_type == GLUI_SINGLE_CLICK) {
         if (obj_cb) {
           // obj_cb(associated_object, user_id);
           obj_cb(this);
         }
       } else {
-        if (last_line == curr_line && (ms - last_click_time) < 300) {
+        if (last_line == curr_line && last_click_time && (ms - last_click_time) < 300) {
           //obj_cb(associated_object, user_id);
           obj_cb(this);
         } else {
@@ -190,7 +192,7 @@ void    GLUI_List::activate( int how )
 
 /****************************** GLUI_List::deactivate() **********/
 
-void    GLUI_List::deactivate( void )
+void    GLUI_List::deactivate()
 {
   active = false;
   redraw();
@@ -271,7 +273,7 @@ void    GLUI_List::draw( int x, int y )
   }
 
   if (scrollbar) {
-    scrollbar->set_int_limits(MAX(0,num_lines-visible_lines), 0);
+    scrollbar->set_int_limits(std::max(0,num_lines-visible_lines), 0);
     glPushMatrix();
     glTranslatef(scrollbar->x_abs-x_abs, scrollbar->y_abs-y_abs,0.0);
     scrollbar->draw_scroll();
@@ -281,7 +283,7 @@ void    GLUI_List::draw( int x, int y )
 
 /********************************* GLUI_List::draw_text() ****************/
 
-void    GLUI_List::draw_text(const char *t, int selected, int x, int y )
+void    GLUI_List::draw_text(const GLUI_String &t, int selected, int x, int y )
 {
   int text_x, i, x_pos;
   int box_width;
@@ -311,7 +313,7 @@ void    GLUI_List::draw_text(const char *t, int selected, int x, int y )
 
     glRasterPos2i( text_x, y+15);
     i = 0;
-    while( t[i] != '\0' && substring_width(t,0,i) < box_width) {
+    while( i<t.size() && substring_width(t,0,i) < box_width) {
       glutBitmapCharacter( get_font(), t[i] );
       x_pos += char_width( t[i] );
       i++;
@@ -322,7 +324,7 @@ void    GLUI_List::draw_text(const char *t, int selected, int x, int y )
     x_pos = text_x;
     glColor3f( 1., 1., 1. );
     glRasterPos2i( text_x, y+15);
-    while( t[i] != '\0' && substring_width(t,0,i) < box_width) {
+    while( i<t.size() &&  substring_width(t,0,i) < box_width) {
       glutBitmapCharacter( get_font(), t[i] );
       x_pos += char_width( t[i] );
       i++;
@@ -336,14 +338,14 @@ int GLUI_List::find_line(int x, int y) {
 }
 
 int      GLUI_List::get_box_width() {
-   return MAX( this->w
+   return std::max( this->w
 		   - 6     /*  2 * the two-line box border */
 		   - 2 * GLUI_LIST_BOXINNERMARGINX, 0 );
 
 }
 
 /******************************** GLUI_List::substring_width() *********/
-int  GLUI_List::substring_width( const char *t, int start, int end )
+int  GLUI_List::substring_width( const GLUI_String &t, int start, int end )
 {
   int i, width;
 
@@ -358,7 +360,7 @@ int  GLUI_List::substring_width( const char *t, int start, int end )
 
 /***************************** GLUI_List::update_and_draw_text() ********/
 
-void   GLUI_List::update_and_draw_text( void )
+void   GLUI_List::update_and_draw_text()
 {
   if ( NOT can_draw() )
     return;
@@ -400,7 +402,7 @@ int    GLUI_List::special_handler( int key,int modifiers )
 
 /************************************ GLUI_List::update_size() **********/
 
-void   GLUI_List::update_size( void )
+void   GLUI_List::update_size()
 {
   if ( NOT glui )
     return;
@@ -411,7 +413,7 @@ void   GLUI_List::update_size( void )
 
 /**************************************** GLUI_Listbox::add_item() **********/
 
-int  GLUI_List::add_item( int id, const char *new_text )
+int  GLUI_List::add_item( int id, const GLUI_String &new_text )
 {
   GLUI_List_Item *new_node = new GLUI_List_Item;
   GLUI_List_Item *head;
@@ -434,7 +436,7 @@ int  GLUI_List::add_item( int id, const char *new_text )
   }
   num_lines++;
   if (scrollbar)
-    scrollbar->set_int_limits(MAX(num_lines-visible_lines,0), 0);
+    scrollbar->set_int_limits(std::max(num_lines-visible_lines,0), 0);
 
   return true;
 }
@@ -461,7 +463,7 @@ int  GLUI_List::delete_all()
 
 /************************************** GLUI_Listbox::delete_item() **********/
 
-int  GLUI_List::delete_item( const char *text )
+int  GLUI_List::delete_item( const GLUI_String &text )
 {
   GLUI_List_Item *node = get_item_ptr( text );
 
@@ -497,7 +499,7 @@ int  GLUI_List::delete_item( int id )
 
 /************************************ GLUI_Listbox::get_item_ptr() **********/
 
-GLUI_List_Item *GLUI_List::get_item_ptr( const char *text )
+GLUI_List_Item *GLUI_List::get_item_ptr( const GLUI_String &text )
 {
   GLUI_List_Item *item;
 

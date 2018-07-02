@@ -13,6 +13,12 @@
 #include <string.h>
 #include <GL/glui.h>
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 float xy_aspect;
 int   last_x, last_y;
 float rotationX = 0.0, rotationY = 0.0;
@@ -54,7 +60,7 @@ void control_cb( int control )
   printf( "             checkbox: %d\n", checkbox->get_int_val() );
   printf( "              spinner: %d\n", spinner->get_int_val() );
   printf( "          radio group: %d\n", radio->get_int_val() );
-  printf( "                 text: %s\n", edittext->get_text() );
+  printf( "                 text: %s\n", edittext->get_text().c_str() );
   
 }
 
@@ -127,7 +133,7 @@ void myGlutReshape( int x, int y )
 
 /***************************************** myGlutDisplay() *****************/
 
-void myGlutDisplay( void )
+void myGlutDisplay()
 {
   glClearColor( .9f, .9f, .9f, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

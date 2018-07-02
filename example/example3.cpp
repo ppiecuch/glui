@@ -14,6 +14,12 @@
 #include <string.h>
 #include <GL/glui.h>
 
+#ifdef __APPLE__
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+
 float xy_aspect;
 int   last_x, last_y;
 float rotationX = 0.0, rotationY = 0.0;
@@ -142,7 +148,7 @@ void pointer_cb( GLUI_Control* control )
   }
   else if ( control == cmd_line ) {
     /*** User typed text into the 'command line' window ***/
-    printf( "Command (%d): %s\n", counter, cmd_line->get_text() );
+    printf( "Command (%d): %s\n", counter, cmd_line->get_text().c_str() );
     std::string text = cmd_line->get_text();
     if (text =="exit" || text == "quit")
       exit(0);
@@ -190,7 +196,7 @@ void myGlutMenu( int value )
 
 /***************************************** myGlutIdle() ***********/
 
-void myGlutIdle( void )
+void myGlutIdle()
 {
   /* According to the GLUT specification, the current window is 
      undefined during an idle callback.  So we need to explicitly change
@@ -254,7 +260,7 @@ void myGlutReshape( int x, int y )
 
 /***************************************** myGlutDisplay() *****************/
 
-void myGlutDisplay( void )
+void myGlutDisplay()
 {
   glClearColor( .9f, .9f, .9f, 1.0f );
   glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );

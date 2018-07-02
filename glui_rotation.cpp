@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -34,6 +34,7 @@
 #include "GL/glui.h"
 #include "arcball.h"
 #include "algebra3.h"
+#include "tinyformat.h"
 
 /*************************** GLUI_Rotation::iaction_mouse_down_handler() ***/
 
@@ -99,7 +100,7 @@ int    GLUI_Rotation::iaction_mouse_held_down_handler( int local_x, int local_y,
 
 /******************** GLUI_Rotation::iaction_draw_active_area_persp() **************/
 
-void    GLUI_Rotation::iaction_draw_active_area_persp( void )
+void    GLUI_Rotation::iaction_draw_active_area_persp()
 {
   /********** arcball *******/
   copy_float_array_to_ball();
@@ -130,7 +131,7 @@ void    GLUI_Rotation::iaction_draw_active_area_persp( void )
 
 /******************** GLUI_Rotation::iaction_draw_active_area_ortho() **********/
 
-void    GLUI_Rotation::iaction_draw_active_area_ortho( void )
+void    GLUI_Rotation::iaction_draw_active_area_ortho()
 {
   float radius;
   radius = (float)(h-22)/2.0;  /*MIN((float)w/2.0, (float)h/2.0);  */
@@ -184,7 +185,7 @@ int    GLUI_Rotation::iaction_special_handler( int key,int modifiers )
 
 /********************************** GLUI_Rotation::init_ball() **********/
 
-void  GLUI_Rotation::init_ball( void )
+void  GLUI_Rotation::init_ball()
 {
   /*printf( "%f %f %f", float( MIN(w/2,h/2)), (float) w/2, (float) h/2 );              */
 
@@ -198,7 +199,7 @@ void  GLUI_Rotation::init_ball( void )
 
 /****************************** GLUI_Rotation::setup_texture() *********/
 
-void GLUI_Rotation::setup_texture( void )
+void GLUI_Rotation::setup_texture()
 {
   static GLuint tex=0u;
   GLenum t=GL_TEXTURE_2D;
@@ -264,7 +265,7 @@ void GLUI_Rotation::setup_texture( void )
 
 /****************************** GLUI_Rotation::setup_lights() ***********/
 
-void    GLUI_Rotation::setup_lights( void )
+void    GLUI_Rotation::setup_lights()
 {
   glEnable( GL_LIGHTING );
   /*  if ( enabled )
@@ -317,7 +318,7 @@ void    GLUI_Rotation::draw_ball( float radius )
 
 /****************************** GLUI_Rotation::reset() **********/
 
-void  GLUI_Rotation::reset( void )
+void  GLUI_Rotation::reset()
 {
   ball->init(); /** reset quaternion, etc. **/
   ball->set_params( vec2( (float)(w/2), (float)((h-18)/2)),
@@ -335,7 +336,7 @@ void  GLUI_Rotation::reset( void )
 
 /****************************** GLUI_Rotation::needs_idle() *********/
 
-bool GLUI_Rotation::needs_idle( void ) const
+bool GLUI_Rotation::needs_idle() const
 {
   return can_spin;
 }
@@ -343,7 +344,7 @@ bool GLUI_Rotation::needs_idle( void ) const
 
 /****************************** GLUI_Rotation::idle() ***************/
 
-void        GLUI_Rotation::idle( void )
+void        GLUI_Rotation::idle()
 {
   spinning = ball->is_spinning?true:false;
 
@@ -371,7 +372,7 @@ void        GLUI_Rotation::idle( void )
 
 /********************** GLUI_Rotation::copy_float_array_to_ball() *********/
 
-void     GLUI_Rotation::copy_float_array_to_ball( void )
+void     GLUI_Rotation::copy_float_array_to_ball()
 {
   int i;
   float *fp_src, *fp_dst;
@@ -390,7 +391,7 @@ void     GLUI_Rotation::copy_float_array_to_ball( void )
 
 /********************** GLUI_Rotation::copy_ball_to_float_array() *********/
 
-void     GLUI_Rotation::copy_ball_to_float_array( void )
+void     GLUI_Rotation::copy_ball_to_float_array()
 {
   mat4 tmp_rot;
   tmp_rot = *ball->rot_ptr;
@@ -417,7 +418,7 @@ void   GLUI_Rotation::set_spin( float damp_factor )
 /************** GLUI_Rotation::GLUI_Rotation() ********************/
 
 GLUI_Rotation::GLUI_Rotation( GLUI_Node *parent,
-                              const char *name, float *value_ptr,
+                              const GLUI_String &name, float *value_ptr,
                               int id,
                               GLUI_CB cb )
 {
@@ -455,9 +456,9 @@ NO! WVB
 
 /************** GLUI_Rotation::common_init() ********************/
 
-void GLUI_Rotation::common_init( void )
+void GLUI_Rotation::common_init()
 {
-  glui_format_str( name, "Rotation: %p", this );
+  name = tfm::format("Rotation: %p", this );
 //  type                = GLUI_CONTROL_ROTATION;
   w                   = GLUI_ROTATION_WIDTH;
   h                   = GLUI_ROTATION_HEIGHT;

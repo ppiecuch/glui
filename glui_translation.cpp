@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -34,11 +34,14 @@
 #include "GL/glui.h"
 #include "glui_internal.h"
 #include "algebra3.h"
+#include "tinyformat.h"
+
+#include <algorithm>
 
 /********************** GLUI_Translation::GLUI_Translation() ***/
 
 GLUI_Translation::GLUI_Translation(
-  GLUI_Node *parent, const char *name,
+  GLUI_Node *parent, const GLUI_String &name,
   int trans_t, float *value_ptr,
   int id, GLUI_CB cb )
 {
@@ -66,6 +69,22 @@ GLUI_Translation::GLUI_Translation(
     float_array_size = 1;
   }
   init_live();
+}
+
+void GLUI_Translation::common_init()
+{
+  locked              = GLUI_TRANSLATION_LOCK_NONE;
+  name                = tfm::format("Translation: %p", this);
+  w                   = GLUI_MOUSE_INTERACTION_WIDTH;
+  h                   = GLUI_MOUSE_INTERACTION_HEIGHT;
+  can_activate        = true;
+  live_type           = GLUI_LIVE_FLOAT_ARRAY;
+  float_array_size    = 0;
+  alignment           = GLUI_ALIGN_CENTER;
+  trans_type          = GLUI_TRANSLATION_XY;
+  scale_factor        = 1.0;
+  quadObj             = NULL;
+  trans_mouse_code    = GLUI_TRANSLATION_MOUSE_NONE;
 }
 
 /********************** GLUI_Translation::iaction_mouse_down_handler() ***/
@@ -186,14 +205,14 @@ int    GLUI_Translation::iaction_mouse_held_down_handler( int local_x, int local
 
 /******************** GLUI_Translation::iaction_draw_active_area_persp() **************/
 
-void    GLUI_Translation::iaction_draw_active_area_persp( void )
+void    GLUI_Translation::iaction_draw_active_area_persp()
 {
 }
 
 
 /******************** GLUI_Translation::iaction_draw_active_area_ortho() **********/
 
-void    GLUI_Translation::iaction_draw_active_area_ortho( void )
+void    GLUI_Translation::iaction_draw_active_area_ortho()
 {
   /********* Draw emboss circles around arcball control *********/
   float radius;

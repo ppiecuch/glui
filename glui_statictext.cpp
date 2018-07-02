@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -34,7 +34,7 @@
 #include "glui_internal_control.h"
 
 /****************************** GLUI_StaticText::GLUI_StaticText() **********/
-GLUI_StaticText::GLUI_StaticText( GLUI_Node *parent, const char *name )
+GLUI_StaticText::GLUI_StaticText( GLUI_Node *parent, const GLUI_String &name )
 {
   common_init();
   set_name( name );
@@ -53,7 +53,7 @@ void    GLUI_StaticText::draw( int x, int y )
 
 /****************************** GLUI_StaticText::set_text() **********/
 
-void    GLUI_StaticText::set_text( const char *text )
+void    GLUI_StaticText::set_text( const GLUI_String &text )
 {
   set_name( text );
   redraw();
@@ -62,7 +62,7 @@ void    GLUI_StaticText::set_text( const char *text )
 
 /************************************ GLUI_StaticText::update_size() **********/
 
-void   GLUI_StaticText::update_size( void )
+void   GLUI_StaticText::update_size()
 {
   int text_size;
 
@@ -78,7 +78,7 @@ void   GLUI_StaticText::update_size( void )
 
 /****************************** GLUI_StaticText::draw_text() **********/
 
-void    GLUI_StaticText::draw_text( void )
+void    GLUI_StaticText::draw_text()
 {
   if ( NOT can_draw() )
     return;
@@ -90,7 +90,7 @@ void    GLUI_StaticText::draw_text( void )
 
 /****************************** GLUI_StaticText::erase_text() **********/
 
-void    GLUI_StaticText::erase_text( void )
+void    GLUI_StaticText::erase_text()
 {
   if ( NOT can_draw() )
     return;

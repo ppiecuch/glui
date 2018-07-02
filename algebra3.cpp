@@ -5,8 +5,8 @@
   GLUI User Interface Toolkit
   Copyright (c) 1998-2007 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -76,6 +76,9 @@
 
 #include "algebra3.h"
 #include "glui_internal.h"
+
+#include <algorithm>
+
 #include <cmath>
 
 #ifdef VEC_ERROR_FATAL
@@ -335,12 +338,12 @@ void swap(vec2 &a, vec2 &b)
 
 vec2 min_vec(const vec2 &a, const vec2 &b)
 {
-    return vec2(MIN(a.n[VX], b.n[VX]), MIN(a.n[VY], b.n[VY]));
+    return vec2(std::min(a.n[VX], b.n[VX]), std::min(a.n[VY], b.n[VY]));
 }
 
 vec2 max_vec(const vec2 &a, const vec2 &b)
 {
-    return vec2(MAX(a.n[VX], b.n[VX]), MAX(a.n[VY], b.n[VY]));
+    return vec2(std::max(a.n[VX], b.n[VX]), std::max(a.n[VY], b.n[VY]));
 }
 
 vec2 prod(const vec2 &a, const vec2 &b)
@@ -485,7 +488,7 @@ vec3 &vec3::normalize() // it is up to caller to avoid divide-by-zero
     return *this;
 }
 
-vec3 &vec3::homogenize(void) // it is up to caller to avoid divide-by-zero
+vec3 &vec3::homogenize() // it is up to caller to avoid divide-by-zero
 {
     n[VX] /= n[VZ];
     n[VY] /= n[VZ];
@@ -508,9 +511,9 @@ void vec3::set(float x, float y, float z)   // set vector
     n[VZ] = z;
 }
 
-void vec3::print(FILE *file, const char *name) const  // print vector to a file
+void vec3::print(FILE *file, const std::string &name) const  // print vector to a file
 {
-    fprintf( file, "%s: <%f, %f, %f>\n", name, n[VX], n[VY], n[VZ] );
+    fprintf( file, "%s: <%f, %f, %f>\n", name.c_str(), n[VX], n[VY], n[VZ] );
 }
 
 // FRIENDS
@@ -615,17 +618,17 @@ void swap(vec3 &a, vec3 &b)
 vec3 min_vec(const vec3 &a, const vec3 &b)
 {
     return vec3(
-        MIN(a.n[VX], b.n[VX]),
-        MIN(a.n[VY], b.n[VY]),
-        MIN(a.n[VZ], b.n[VZ]));
+        std::min(a.n[VX], b.n[VX]),
+        std::min(a.n[VY], b.n[VY]),
+        std::min(a.n[VZ], b.n[VZ]));
 }
 
 vec3 max_vec(const vec3 &a, const vec3 &b)
 {
     return vec3(
-        MAX(a.n[VX], b.n[VX]),
-        MAX(a.n[VY], b.n[VY]),
-        MAX(a.n[VZ], b.n[VZ]));
+        std::max(a.n[VX], b.n[VX]),
+        std::max(a.n[VY], b.n[VY]),
+        std::max(a.n[VZ], b.n[VZ]));
 }
 
 vec3 prod(const vec3 &a, const vec3 &b)
@@ -781,9 +784,9 @@ vec4 &vec4::apply(V_FCT_PTR fct)
     return *this;
 }
 
-void vec4::print(FILE *file, const char *name) const // print vector to a file
+void vec4::print(FILE *file, const std::string &name) const // print vector to a file
 {
-    fprintf( file, "%s: <%f, %f, %f, %f>\n", name, n[VX], n[VY], n[VZ], n[VW]);
+    fprintf( file, "%s: <%f, %f, %f, %f>\n", name.c_str(), n[VX], n[VY], n[VZ], n[VW]);
 }
 
 void vec4::set(float x, float y, float z, float a)
@@ -918,19 +921,19 @@ void swap(vec4 &a, vec4 &b)
 vec4 min_vec(const vec4 &a, const vec4 &b)
 {
     return vec4(
-        MIN(a.n[VX], b.n[VX]),
-        MIN(a.n[VY], b.n[VY]),
-        MIN(a.n[VZ], b.n[VZ]),
-        MIN(a.n[VW], b.n[VW]));
+        std::min(a.n[VX], b.n[VX]),
+        std::min(a.n[VY], b.n[VY]),
+        std::min(a.n[VZ], b.n[VZ]),
+        std::min(a.n[VW], b.n[VW]));
 }
 
 vec4 max_vec(const vec4 &a, const vec4 &b)
 {
     return vec4(
-        MAX(a.n[VX], b.n[VX]),
-        MAX(a.n[VY], b.n[VY]),
-        MAX(a.n[VZ], b.n[VZ]),
-        MAX(a.n[VW], b.n[VW]));
+        std::max(a.n[VX], b.n[VX]),
+        std::max(a.n[VY], b.n[VY]),
+        std::max(a.n[VZ], b.n[VZ]),
+        std::max(a.n[VW], b.n[VW]));
 }
 
 vec4 prod(const vec4 &a, const vec4 &b)
@@ -1168,11 +1171,11 @@ void swap(mat3 &a, mat3 &b)
     b = tmp;
 }
 
-void mat3::print(FILE *file, const char *name) const
+void mat3::print(FILE *file, const std::string &name) const
 {
     int i, j;
 
-    fprintf( stderr, "%s:\n", name );
+    fprintf( stderr, "%s:\n", name.c_str() );
 
     for( i = 0; i < 3; i++ )
     {
@@ -1348,11 +1351,11 @@ mat4 &mat4::apply(V_FCT_PTR fct)
     return *this;
 }
 
-void mat4::print(FILE *file, const char *name) const
+void mat4::print(FILE *file, const std::string &name) const
 {
     int i, j;
 
-    fprintf( stderr, "%s:\n", name );
+    fprintf( stderr, "%s:\n", name.c_str() );
 
     for( i = 0; i < 4; i++ )
     {

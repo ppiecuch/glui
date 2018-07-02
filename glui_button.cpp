@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,9 +30,13 @@
 *****************************************************************************/
 #include "glui_internal_control.h"
 
+#include "tinyformat.h"
+
+#include <algorithm>
+
 /****************************** GLUI_Button::GLUI_Button() **********/
 
-GLUI_Button::GLUI_Button( GLUI_Node *parent, const char *name,
+GLUI_Button::GLUI_Button( GLUI_Node *parent, const GLUI_String &name,
                           int id, GLUI_CB cb )
 {
   common_init();
@@ -44,6 +48,14 @@ GLUI_Button::GLUI_Button( GLUI_Node *parent, const char *name,
   parent->add_control( this );
 }
 
+void GLUI_Button::common_init() 
+{
+  name         = tfm::format("Button: %p", this);
+  h            = GLUI_BUTTON_SIZE;
+  w            = 100;
+  alignment    = GLUI_ALIGN_CENTER;
+  can_activate = true;
+}
 
 /****************************** GLUI_Button::mouse_down_handler() **********/
 
@@ -112,7 +124,7 @@ void    GLUI_Button::draw( int x, int y )
 
 /************************************** GLUI_Button::draw_pressed() ******/
 
-void   GLUI_Button::draw_pressed( void )
+void   GLUI_Button::draw_pressed()
 {
   glColor3f( 0.0, 0.0, 0.0 );
 
@@ -148,10 +160,10 @@ void     GLUI_Button::draw_text( int sunken )
   string_width = _glutBitmapWidthString( glui->font,
 					 this->name.c_str() );
   if ( NOT sunken ) {
-    draw_name( MAX((w-string_width),0)/2, 13);
+    draw_name( std::max((w-string_width),0)/2, 13);
   }
   else {
-    draw_name( MAX((w-string_width),0)/2 + 1, 13 + 1);
+    draw_name( std::max((w-string_width),0)/2 + 1, 13 + 1);
   }
 
   if ( active ) {
@@ -172,7 +184,7 @@ void     GLUI_Button::draw_text( int sunken )
 
 /************************************** GLUI_Button::update_size() **********/
 
-void   GLUI_Button::update_size( void )
+void   GLUI_Button::update_size()
 {
   int text_size;
 

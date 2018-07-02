@@ -10,8 +10,8 @@
 
   Copyright (c) 1998 Paul Rademacher
 
-  WWW:    http://sourceforge.net/projects/glui/
-  Forums: http://sourceforge.net/forum/?group_id=92496
+  WWW:    https://github.com/libglui/glui
+  Issues: https://github.com/libglui/glui/issues
 
   This software is provided 'as-is', without any express or implied
   warranty. In no event will the authors be held liable for any damages
@@ -32,6 +32,19 @@
 *****************************************************************************/
 
 #include "glui_internal_control.h"
+
+#include "tinyformat.h"
+
+GLUI_Mouse_Interaction::GLUI_Mouse_Interaction()
+{
+    name           = tfm::format("Mouse_Interaction: %p", this );
+    w              = GLUI_MOUSE_INTERACTION_WIDTH;
+    h              = GLUI_MOUSE_INTERACTION_HEIGHT;
+    can_activate   = true;
+    live_type      = GLUI_LIVE_NONE;
+    alignment      = GLUI_ALIGN_CENTER;
+    draw_active_area_only = false;
+}
 
 /********************** GLUI_Mouse_Interaction::mouse_down_handler() ******/
 
@@ -97,7 +110,7 @@ void    GLUI_Mouse_Interaction::draw( int x, int y )
 
 /************************************ GLUI_Mouse_Interaction::update_size() **********/
 
-void   GLUI_Mouse_Interaction::update_size( void )
+void   GLUI_Mouse_Interaction::update_size()
 {
   if ( NOT glui )
     return;
@@ -147,7 +160,7 @@ int    GLUI_Mouse_Interaction::special_handler( int key,int modifiers )
 
 /****************************** GLUI_Mouse_Interaction::draw_active_area() **********/
 
-void    GLUI_Mouse_Interaction::draw_active_area( void )
+void    GLUI_Mouse_Interaction::draw_active_area()
 {
   int win_h = glutGet( GLUT_WINDOW_HEIGHT ), win_w = glutGet(GLUT_WINDOW_WIDTH);
 
